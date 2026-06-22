@@ -68,6 +68,9 @@ export const insertRoom = mutation({
 		}
 		const userId = await ensureProfile(ctx);
 		const total = args.items.reduce((sum, item) => sum + item.priceCentavos * item.qty, 0);
+		if (total > 100_000_000) {
+			throw new Error('Bill total exceeds ₱1,000,000 limit');
+		}
 		if (args.ownContributionCentavos < 0 || args.ownContributionCentavos > total) {
 			throw new Error('Invalid contribution amount');
 		}
@@ -224,9 +227,16 @@ export const setContribution = mutation({
 		roomId: v.id('rooms'),
 		amountCentavos: v.number()
 	},
-	handler: async (ctx, { roomId, amountCentavos }) => {
+		handler: async (ctx, { roomId, amountCentavos }) => {
 		const { userId } = await requireContributor(ctx, roomId);
+		const room = await ctx.db.get(roomId);
+		if (!room || room.status !== 'collecting') {
+			throw new Error('Room is not open for contributions');
+		}
 		const total = await getRoomTotal(ctx, roomId);
+		if (total === 0) {
+			throw new Error('Cannot contribute to a room with no bill total');
+		}
 		if (amountCentavos < 0 || amountCentavos > total) {
 			throw new Error('Contribution must be between 0 and the bill total');
 		}
