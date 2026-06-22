@@ -6,6 +6,7 @@
 	import MemberList from '$lib/components/MemberList.svelte';
 	import SettlementPreview from '$lib/components/SettlementPreview.svelte';
 	import SettlementList from '$lib/components/SettlementList.svelte';
+	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
 
@@ -113,8 +114,9 @@
 	<Spinner />
 {:else}
 	{@const state = roomState.data}
-	<div class="space-y-6">
-		<div class="flex items-start justify-between">
+	<ErrorBoundary error={roomState.error}>
+		<div class="space-y-6">
+			<div class="flex items-start justify-between">
 			<div>
 				<h1 class="text-2xl font-bold">{state.room.name}</h1>
 				<p class="font-mono text-sm text-slate-500">Code: {data.code}</p>
@@ -192,5 +194,6 @@
 				/>
 			</section>
 		{/if}
-	</div>
+		</div>
+	</ErrorBoundary>
 {/if}

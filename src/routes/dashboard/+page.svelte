@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { useQuery } from '@mmailaender/convex-svelte';
 	import { api } from '$lib/convex-api.js';
+	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 
 	const rooms = useQuery(api.queries.listMyRooms, () => ({}));
@@ -16,20 +17,24 @@
 {#if rooms.isLoading}
 	<Spinner />
 {:else if rooms.data && rooms.data.length > 0}
-	<div class="space-y-3">
-		{#each rooms.data as room (room._id)}
-			<a
-				href="/rooms/{room.code}"
-				class="flex items-center justify-between rounded-lg border border-slate-200 p-4 hover:bg-slate-50"
-			>
-				<div>
-					<p class="font-medium">{room.name}</p>
-					<p class="text-xs text-slate-500">{room.code} · {room.status}</p>
-				</div>
-				<span class="text-xs uppercase text-slate-400">{room.role}</span>
-			</a>
-		{/each}
-	</div>
+	<ErrorBoundary error={rooms.error}>
+		<div class="space-y-3">
+			{#each rooms.data as room (room._id)}
+				<a
+					href="/rooms/{room.code}"
+					class="flex items-center justify-between rounded-lg border border-slate-200 p-4 hover:bg-slate-50"
+				>
+					<div>
+						<p class="font-medium">{room.name}</p>
+						<p class="text-xs text-slate-500">{room.code} · {room.status}</p>
+					</div>
+					<span class="text-xs uppercase text-slate-400">{room.role}</span>
+				</a>
+			{/each}
+		</div>
+	</ErrorBoundary>
 {:else}
-	<p class="text-slate-500">No rooms yet. Create one to get started.</p>
+	<ErrorBoundary error={rooms.error}>
+		<p class="text-slate-500">No rooms yet. Create one to get started.</p>
+	</ErrorBoundary>
 {/if}

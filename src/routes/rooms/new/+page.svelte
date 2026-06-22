@@ -3,6 +3,7 @@
 	import { useAction } from '@mmailaender/convex-svelte';
 	import { api } from '$lib/convex-api.js';
 	import ItemEditor, { type ItemInput } from '$lib/components/ItemEditor.svelte';
+	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toCentavos, formatPHP } from '$lib/money.js';
 	import { toasts } from '$lib/stores/toast.js';
@@ -13,6 +14,7 @@
 	let items = $state<ItemInput[]>([]);
 	let ownContribution = $state('');
 	let loading = $state(false);
+	let createError = $state<string | null>(null);
 
 	const totalCentavos = $derived(
 		items.reduce((sum, item) => sum + item.priceCentavos * item.qty, 0)
@@ -26,6 +28,7 @@
 
 	async function submit(e: Event) {
 		e.preventDefault();
+		createError = null;
 		if (!name.trim()) {
 			toasts.add('Room name is required', 'error');
 			return;
@@ -51,7 +54,8 @@
 			toasts.add('Room created', 'success');
 			goto(`/rooms/${code}`);
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Create failed', 'error');
+			createError = err instanceof Error ? err.message : 'Create failed';
+			toasts.add(createError, 'error');
 			loading = false;
 		}
 	}
@@ -59,9 +63,10 @@
 
 <h1 class="mb-6 text-2xl font-bold">New room</h1>
 
-<form onsubmit={submit} class="space-y-6">
-	<div>
-		<label class="block text-sm font-medium" for="name">Room name</label>
+<ErrorBoundary error={createError}>
+	<form onsubmit={submit} class="space-y-6">
+		<div>
+			<label class="block text-sm font-medium" for="name">Room name</label>
 		<input
 			id="name"
 			bind:value={name}
@@ -97,4 +102,5 @@
 			Create room
 		{/if}
 	</button>
-</form>
+	</form>
+</ErrorBoundary>

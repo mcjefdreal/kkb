@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { useQuery, useMutation } from '@mmailaender/convex-svelte';
 	import { api } from '$lib/convex-api.js';
+	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
 
@@ -39,6 +40,7 @@
 
 <h1 class="mb-6 text-2xl font-bold">Join a room</h1>
 
+<ErrorBoundary error={lookup.error}>
 <div class="mx-auto max-w-sm space-y-4">
 	<div>
 		<label class="block text-sm font-medium" for="code">Room code</label>
@@ -69,3 +71,4 @@
 		<p class="text-sm text-red-700">Room not found.</p>
 	{/if}
 </div>
+</ErrorBoundary>
