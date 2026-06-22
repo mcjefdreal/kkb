@@ -1,9 +1,9 @@
 import { error, redirect } from '@sveltejs/kit';
-import { createConvexHttpClient } from '@mmailaender/convex-better-auth-svelte/sveltekit';
+import { createAuthedHttpClient } from '$lib/auth/server.js';
 import { api } from '$lib/convex-api.js';
 
-export async function loadRoomGuard(code: string) {
-	const client = createConvexHttpClient();
+export async function loadRoomGuard(code: string, token?: string) {
+	const client = createAuthedHttpClient(token);
 	const room = await client.query(api.queries.getRoomByCode, { code });
 	if (!room) {
 		throw error(404, 'Room not found');
