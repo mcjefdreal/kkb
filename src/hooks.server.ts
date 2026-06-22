@@ -1,27 +1,20 @@
 import type { Handle } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
-import { createAuth } from '../convex/betterAuth/auth.js';
-import { getToken, getAuthState } from '@mmailaender/convex-better-auth-svelte/sveltekit';
-import { withServerConvexToken } from '@mmailaender/convex-svelte/sveltekit/server';
+import { getSessionToken } from '$lib/auth/server.js';
 
 const PUBLIC_PATHS = ['/', '/login'];
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const isPublic =
-		PUBLIC_PATHS.includes(event.url.pathname) || event.url.pathname.startsWith('/api/auth/');
+	const isPublic = PUBLIC_PATHS.includes(event.url.pathname);
 
-	const token = await getToken(createAuth, event.cookies);
+	const token = getSessionToken(event.cookies);
 	event.locals.token = token;
+	event.locals.isAuthenticated = !!token;
+	event.locals.user = null;
 
-	return withServerConvexToken(token, async () => {
-		const authState = getAuthState();
-		event.locals.isAuthenticated = authState.isAuthenticated;
-		event.locals.user = authState.user ?? null;
+	if (!isPublic && !token) {
+		throw redirect(302, '/login');
+	}
 
-		if (!isPublic && !token) {
-			throw redirect(302, '/login');
-		}
-
-		return resolve(event);
-	});
+	return resolve(event);
 };
