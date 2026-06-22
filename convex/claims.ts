@@ -17,6 +17,10 @@ export const setClaim = mutation({
 		}
 		const userId = await getUserId(ctx);
 		await requireMember(ctx, item.roomId);
+		const room = await ctx.db.get(item.roomId);
+		if (!room || room.status !== 'collecting') {
+			throw new Error('Room is not open for claims');
+		}
 		const existing = await ctx.db
 			.query('itemClaims')
 			.withIndex('itemId_userId', (q) => q.eq('itemId', itemId).eq('userId', userId))
@@ -50,6 +54,10 @@ export const deleteClaim = mutation({
 		}
 		const userId = await getUserId(ctx);
 		await requireMember(ctx, item.roomId);
+		const room = await ctx.db.get(item.roomId);
+		if (!room || room.status !== 'collecting') {
+			throw new Error('Room is not open for claims');
+		}
 		const existing = await ctx.db
 			.query('itemClaims')
 			.withIndex('itemId_userId', (q) => q.eq('itemId', itemId).eq('userId', userId))
