@@ -321,3 +321,122 @@ export const finalizeSettlement = mutation({
 		return { transactions, residueCentavos };
 	})
 });
+
+export const markPaid = mutation({
+	args: {
+		settlementId: v.id('settlementPayments'),
+		method: v.union(v.literal('cash'), v.literal('gcash'), v.literal('maya')),
+		reference: v.optional(v.string())
+	},
+	handler: async (ctx, { settlementId, method, reference }) => {
+		const payment = await ctx.db.get(settlementId);
+		if (!payment) {
+			throw new Error('Payment not found');
+		}
+		const userId = await getUserId(ctx);
+		if (payment.payerUserId !== userId) {
+			throw new Error('Only the payer can mark this paid');
+		}
+		if (payment.status !== 'pending') {
+			throw new Error('Payment can only be marked from pending status');
+		}
+		if (payment.method !== 'pending' && payment.method !== method) {
+			throw new Error('Payment method cannot be changed');
+		}
+		if (method === 'gcash' || method === 'maya') {
+			const profile = await ctx.db
+				.query('profiles')
+				.withIndex('userId', (q) => q.eq('userId', payment.payeeUserId))
+				.unique();
+			const number = method === 'gcash' ? profile?.gcashNumber : profile?.mayaNumber;
+			if (!number) {
+				throw new Error(`Payee has not configured ${method} number`);
+			}
+		}
+		const status = method === 'cash' ? 'confirmed' : 'pending_confirmation';
+		await ctx.db.patch(settlementId, { method, status, reference });
+	}
+});
+
+export const unmarkPaid = mutation({
+	args: { settlementId: v.id('settlementPayments') },
+	handler: async (ctx, { settlementId }) => {
+		const payment = await ctx.db.get(settlementId);
+		if (!payment) {
+			throw new Error('Payment not found');
+		}
+		const userId = await getUserId(ctx);
+		if (payment.payerUserId !== userId) {
+			throw new Error('Only the payer can unmark this payment');
+		}
+		if (payment.status !== 'pending_confirmation') {
+			throw new Error('Only pending-confirmation payments can be unmarked');
+		}
+		await ctx.db.patch(settlementId, { method: 'pending', status: 'pending', reference: undefined });
+	}
+});
+
+export const confirmPayment = mutation({
+	args: { settlementId: v.id('settlementPayments') },
+	handler: async (ctx, { settlementId }) => {
+		const payment = await ctx.db.get(settlementId);
+		if (!payment) {
+			throw new Error('Payment not found');
+		}
+		const userId = await getUserId(ctx);
+		if (payment.payeeUserId !== userId) {
+			throw new Error('Only the payee can confirm this payment');
+		}
+		if (payment.status !== 'pending_confirmation') {
+			throw new Error('Payment must be pending confirmation');
+		}
+		await ctx.db.patch(settlementId, { status: 'confirmed' });
+		const allPayments = await ctx.db
+			.query('settlementPayments')
+			.withIndex('roomId', (q) => q.eq('roomId', payment.roomId))
+			.collect();
+		if (allPayments.every((p) => p.status === 'confirmed')) {
+			await ctx.db.patch(payment.roomId, { status: 'settled', lastActivity: Date.now() });
+		}
+	}
+});
+
+export const reopenRoom = mutation({
+	args: { roomId: v.id('rooms') },
+	handler: creatorMutation(async (ctx, { roomId }) => {
+		const payments = await ctx.db
+			.query('settlementPayments')
+			.withIndex('roomId', (q) => q.eq('roomId', roomId))
+			.collect();
+		if (payments.some((p) => p.status === 'confirmed')) {
+			throw new Error('Cannot reopen: some payments are already confirmed');
+		}
+		for (const payment of payments) {
+			await ctx.db.delete(payment._id);
+		}
+		await ctx.db.patch(roomId, { status: 'collecting', lastActivity: Date.now() });
+	})
+});
+
+export const deleteRoom = mutation({
+	args: { roomId: v.id('rooms') },
+	handler: creatorMutation(async (ctx, { roomId }) => {
+		const members = await ctx.db.query('roomMembers').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
+		const items = await ctx.db.query('items').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
+		const contributions = await ctx.db.query('contributions').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
+		const payments = await ctx.db.query('settlementPayments').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
+		const claims = await ctx.db.query('itemClaims').collect();
+
+		for (const p of payments) await ctx.db.delete(p._id);
+		for (const c of contributions) await ctx.db.delete(c._id);
+		for (const claim of claims) {
+			const item = await ctx.db.get(claim.itemId);
+			if (item && item.roomId === roomId) {
+				await ctx.db.delete(claim._id);
+			}
+		}
+		for (const item of items) await ctx.db.delete(item._id);
+		for (const m of members) await ctx.db.delete(m._id);
+		await ctx.db.delete(roomId);
+	})
+});
