@@ -132,3 +132,42 @@ export function computeSettlement(
 		fundingGap
 	};
 }
+
+export function applyResidueToLargestCreditor(
+	transactions: SettlementTransaction[],
+	residueCentavos: number
+): SettlementTransaction[] {
+	if (residueCentavos <= 0) return transactions;
+
+	const payeeTotals = new Map<string, number>();
+	for (const t of transactions) {
+		payeeTotals.set(t.payeeUserId, (payeeTotals.get(t.payeeUserId) ?? 0) + t.amountCentavos);
+	}
+
+	let targetPayee: string | null = null;
+	let maxTotal = -1;
+	for (const [payee, total] of payeeTotals) {
+		if (total > maxTotal) {
+			maxTotal = total;
+			targetPayee = payee;
+		}
+	}
+	if (!targetPayee) return transactions;
+
+	let remaining = residueCentavos;
+	const sorted = [...transactions].sort((a, b) => b.amountCentavos - a.amountCentavos);
+	const result: SettlementTransaction[] = [];
+	for (const t of sorted) {
+		if (remaining > 0 && t.payeeUserId === targetPayee) {
+			const reduceBy = Math.min(remaining, t.amountCentavos);
+			const newAmount = t.amountCentavos - reduceBy;
+			remaining -= reduceBy;
+			if (newAmount > 0) {
+				result.push({ ...t, amountCentavos: newAmount });
+			}
+		} else {
+			result.push(t);
+		}
+	}
+	return result;
+}

@@ -1,7 +1,7 @@
 import { action, mutation, type QueryCtx, type MutationCtx } from './_generated/server.js';
 import { api } from './_generated/api.js';
 import { creatorMutation, requireContributor, requireMember, getUserId } from './authz.js';
-import { computeSettlement } from './settlement.js';
+import { applyResidueToLargestCreditor, computeSettlement } from './settlement.js';
 import { authComponent } from './betterAuth/auth.js';
 import { v } from 'convex/values';
 import type { Id } from 'convex/values';
@@ -309,7 +309,7 @@ export const finalizeSettlement = mutation({
 					priceCentavos: i.priceCentavos,
 					qty: i.qty
 				})),
-			claims: allClaims.map((c) => ({ itemId: c.itemId, userId: c.userId, shares: c.shares })),
+				claims: allClaims.map((c) => ({ itemId: c.itemId, userId: c.userId, shares: c.shares })),
 				contributions: contributions.map((c) => ({
 					userId: c.userId,
 					amountCentavos: c.amountCentavos
@@ -317,9 +317,10 @@ export const finalizeSettlement = mutation({
 			},
 			'strict'
 		);
+		const adjustedTransactions = applyResidueToLargestCreditor(transactions, residueCentavos);
 
 		const now = Date.now();
-		for (const t of transactions) {
+		for (const t of adjustedTransactions) {
 			await ctx.db.insert('settlementPayments', {
 				roomId,
 				payerUserId: t.payerUserId,
@@ -333,7 +334,7 @@ export const finalizeSettlement = mutation({
 
 		await ctx.db.patch(roomId, { status: 'settling', lastActivity: now });
 
-		return { transactions, residueCentavos };
+		return { transactions: adjustedTransactions, residueCentavos };
 	})
 });
 
