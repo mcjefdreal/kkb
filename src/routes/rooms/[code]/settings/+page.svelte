@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { useQuery, useMutation } from '@mmailaender/convex-svelte';
-	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
+	import { useQuery, useMutation } from 'convex-svelte';
+	import { useAuth } from '$lib/auth/client.svelte.js';
 	import { api } from '$lib/convex-api.js';
 	import MemberList from '$lib/components/MemberList.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';

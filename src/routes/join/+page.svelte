@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { useQuery, useMutation } from '@mmailaender/convex-svelte';
+	import { useQuery, useMutation } from 'convex-svelte';
 	import { api } from '$lib/convex-api.js';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';

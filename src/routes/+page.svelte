@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
+	import { useAuth } from '$lib/auth/client.svelte.js';
 
 	const auth = useAuth();
 </script>

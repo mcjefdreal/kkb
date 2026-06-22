@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { useAction } from '@mmailaender/convex-svelte';
+	import { useAction } from 'convex-svelte';
 	import { api } from '$lib/convex-api.js';
 	import ItemEditor, { type ItemInput } from '$lib/components/ItemEditor.svelte';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useQuery, useMutation } from '@mmailaender/convex-svelte';
+	import { useQuery, useMutation } from 'convex-svelte';
 	import { api } from '$lib/convex-api.js';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';

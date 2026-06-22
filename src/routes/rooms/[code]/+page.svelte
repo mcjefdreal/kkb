@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { useQuery, useMutation } from '@mmailaender/convex-svelte';
-	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
+	import { useQuery, useMutation } from 'convex-svelte';
+	import { useAuth } from '$lib/auth/client.svelte.js';
 	import { api } from '$lib/convex-api.js';
 	import ItemClaimGrid from '$lib/components/ItemClaimGrid.svelte';
 	import MemberList from '$lib/components/MemberList.svelte';
