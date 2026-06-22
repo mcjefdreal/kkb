@@ -6,7 +6,7 @@ Bill-splitting web app built with SvelteKit, Convex, and BetterAuth.
 
 - Frontend: SvelteKit (Svelte 5 runes, TypeScript 6, Tailwind v4, Vite 8)
 - Backend: Self-hosted Convex with BetterAuth on Convex
-- Realtime: `@mmailaender/convex-svelte` + `@mmailaender/convex-better-auth-svelte`
+- Realtime: `convex-svelte` + `@convex-dev/better-auth`
 - Deploy: `@sveltejs/adapter-node` for the frontend; Convex backend in Docker
 
 ## Local development
