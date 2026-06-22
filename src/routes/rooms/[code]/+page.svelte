@@ -31,6 +31,14 @@
 		roomState.data?.items.reduce((sum, i) => sum + i.priceCentavos * i.qty, 0) ?? 0
 	);
 	const editable = $derived(roomState.data?.room.status === 'collecting');
+	const paymentProgress = $derived(
+		roomState.data
+			? {
+					confirmed: roomState.data.settlements.filter((p) => p.status === 'confirmed').length,
+					total: roomState.data.settlements.length
+				}
+			: { confirmed: 0, total: 0 }
+	);
 
 	const creditorsWithoutWallet = $derived(
 		(() => {
@@ -111,6 +119,11 @@
 				<h1 class="text-2xl font-bold">{state.room.name}</h1>
 				<p class="font-mono text-sm text-slate-500">Code: {data.code}</p>
 				<p class="text-xs uppercase text-slate-400">{state.room.status}</p>
+				{#if paymentProgress.total > 0}
+					<p class="text-xs text-slate-500">
+						Payments: {paymentProgress.confirmed}/{paymentProgress.total} confirmed
+					</p>
+				{/if}
 			</div>
 			{#if isCreator && editable}
 				<div class="text-right">
