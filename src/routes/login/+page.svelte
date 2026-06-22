@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authClient } from '$lib/auth-client.js';
+	import { authClient } from '$lib/auth-client';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
 
