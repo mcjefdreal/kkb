@@ -1,5 +1,5 @@
 import type { QueryCtx, MutationCtx } from './_generated/server.js';
-import type { Id } from 'convex/values';
+import type { Id } from './_generated/dataModel.js';
 
 export async function getUserId(ctx: QueryCtx | MutationCtx): Promise<string> {
 	const identity = await ctx.auth.getUserIdentity();

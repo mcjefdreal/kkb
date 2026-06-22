@@ -1,10 +1,10 @@
-import { action, mutation, type QueryCtx, type MutationCtx } from './_generated/server.js';
+import { action, mutation, type MutationCtx } from './_generated/server.js';
 import { api } from './_generated/api.js';
 import { creatorMutation, requireContributor, requireMember, getUserId } from './authz.js';
 import { applyResidueToLargestCreditor, computeSettlement } from './settlement.js';
 import { authComponent } from './betterAuth/auth.js';
 import { v } from 'convex/values';
-import type { Id } from 'convex/values';
+import type { Id } from './_generated/dataModel.js';
 
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const CODE_LENGTH = 8;
@@ -18,7 +18,7 @@ function generateCode(): string {
 	return code;
 }
 
-async function ensureProfile(ctx: QueryCtx | MutationCtx) {
+async function ensureProfile(ctx: MutationCtx) {
 	const identity = await ctx.auth.getUserIdentity();
 	if (!identity) {
 		throw new Error('Unauthorized');
@@ -123,7 +123,7 @@ export const createRoom = action({
 		),
 		ownContributionCentavos: v.number()
 	},
-	handler: async (ctx, args) => {
+	handler: async (ctx, args): Promise<string> => {
 		let lastError: unknown;
 		for (let i = 0; i < MAX_RETRIES; i++) {
 			const code = generateCode();
@@ -202,7 +202,10 @@ export const setMemberRole = mutation({
 		targetUserId: v.string(),
 		role: v.union(v.literal('member'), v.literal('contributor'))
 	},
-	handler: creatorMutation(async (ctx, { roomId, targetUserId, role }) => {
+	handler: creatorMutation<
+		{ roomId: Id<'rooms'>; targetUserId: string; role: 'member' | 'contributor' },
+		void
+	>(async (ctx, { roomId, targetUserId, role }) => {
 		const member = await ctx.db
 			.query('roomMembers')
 			.withIndex('roomId_userId', (q) => q.eq('roomId', roomId).eq('userId', targetUserId))
