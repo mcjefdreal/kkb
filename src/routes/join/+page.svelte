@@ -8,6 +8,11 @@
 	let code = $state('');
 	let checkedCode = $state<string | null>(null);
 
+	$effect(() => {
+		const normalized = code.trim().toUpperCase();
+		checkedCode = normalized.length === 8 ? normalized : null;
+	});
+
 	const lookup = useQuery(api.queries.getRoomByCode, () =>
 		checkedCode ? { code: checkedCode } : 'skip'
 	);
