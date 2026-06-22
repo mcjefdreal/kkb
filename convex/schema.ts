@@ -69,7 +69,7 @@ export default defineSchema({
 		payerUserId: v.string(),
 		payeeUserId: v.string(),
 		amountCentavos: v.number(),
-		method: v.union(v.literal('cash'), v.literal('gcash'), v.literal('maya')),
+		method: v.union(v.literal('pending'), v.literal('cash'), v.literal('gcash'), v.literal('maya')),
 		status: v.union(
 			v.literal('pending'),
 			v.literal('pending_confirmation'),

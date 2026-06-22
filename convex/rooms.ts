@@ -1,6 +1,7 @@
 import { action, mutation, type QueryCtx, type MutationCtx } from './_generated/server.js';
 import { api } from './_generated/api.js';
 import { creatorMutation, requireContributor, requireMember, getUserId } from './authz.js';
+import { computeSettlement } from './settlement.js';
 import { authComponent } from './betterAuth/auth.js';
 import { v } from 'convex/values';
 import type { Id } from 'convex/values';
@@ -255,4 +256,68 @@ export const setContribution = mutation({
 		}
 		await ctx.db.patch(roomId, { lastActivity: Date.now() });
 	}
+});
+
+export const finalizeSettlement = mutation({
+	args: { roomId: v.id('rooms') },
+	handler: creatorMutation(async (ctx, { roomId }) => {
+		const room = await ctx.db.get(roomId);
+		if (!room || room.status !== 'collecting') {
+			throw new Error('Room is not open for settlement');
+		}
+		const items = await ctx.db.query('items').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
+		const allClaims = await ctx.db.query('itemClaims').collect();
+		const contributions = await ctx.db.query('contributions').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
+
+		let totalCost = 0;
+		for (const item of items) {
+			totalCost += item.priceCentavos * item.qty;
+			const itemClaims = allClaims.filter((c) => c.itemId === item._id);
+			const totalShares = itemClaims.reduce((sum, c) => sum + c.shares, 0);
+			if (totalShares !== item.qty) {
+				throw new Error(`Item "${item.name}" is not fully claimed`);
+			}
+		}
+
+		const totalContributed = contributions.reduce((sum, c) => sum + c.amountCentavos, 0);
+		if (totalContributed !== totalCost) {
+			throw new Error('Total contributions must equal the bill total');
+		}
+
+		const { transactions, residueCentavos } = computeSettlement(
+			{
+				items: items.map((i) => ({
+					_id: i._id,
+					name: i.name,
+					priceCentavos: i.priceCentavos,
+					qty: i.qty
+				})),
+				claims: allClaims
+					.filter((c) => items.some((i) => i._id === c.itemId))
+					.map((c) => ({ itemId: c.itemId, userId: c.userId, shares: c.shares })),
+				contributions: contributions.map((c) => ({
+					userId: c.userId,
+					amountCentavos: c.amountCentavos
+				}))
+			},
+			'strict'
+		);
+
+		const now = Date.now();
+		for (const t of transactions) {
+			await ctx.db.insert('settlementPayments', {
+				roomId,
+				payerUserId: t.payerUserId,
+				payeeUserId: t.payeeUserId,
+				amountCentavos: t.amountCentavos,
+				method: 'pending',
+				status: 'pending',
+				createdAt: now
+			});
+		}
+
+		await ctx.db.patch(roomId, { status: 'settling', lastActivity: now });
+
+		return { transactions, residueCentavos };
+	})
 });
