@@ -5,6 +5,7 @@
 	import ItemClaimGrid from '$lib/components/ItemClaimGrid.svelte';
 	import MemberList from '$lib/components/MemberList.svelte';
 	import SettlementPreview from '$lib/components/SettlementPreview.svelte';
+	import SettlementList from '$lib/components/SettlementList.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
 
@@ -18,6 +19,9 @@
 	const setContribution = useMutation(api.rooms.setContribution);
 	const setRole = useMutation(api.rooms.setMemberRole);
 	const finalize = useMutation(api.rooms.finalizeSettlement);
+	const markPaid = useMutation(api.rooms.markPaid);
+	const unmarkPaid = useMutation(api.rooms.unmarkPaid);
+	const confirmPayment = useMutation(api.rooms.confirmPayment);
 
 	const currentUserId = $derived(auth.user?.id ?? '');
 	const isCreator = $derived(
@@ -69,6 +73,30 @@
 			toasts.add('Room locked for settlement', 'success');
 		} catch (err) {
 			toasts.add(err instanceof Error ? err.message : 'Finalize failed', 'error');
+		}
+	}
+
+	async function handleMarkPaid(paymentId: string, method: 'cash' | 'gcash' | 'maya') {
+		try {
+			await markPaid({ settlementId: paymentId as any, method });
+		} catch (err) {
+			toasts.add(err instanceof Error ? err.message : 'Payment failed', 'error');
+		}
+	}
+
+	async function handleUnmark(paymentId: string) {
+		try {
+			await unmarkPaid({ settlementId: paymentId as any });
+		} catch (err) {
+			toasts.add(err instanceof Error ? err.message : 'Unmark failed', 'error');
+		}
+	}
+
+	async function handleConfirm(paymentId: string) {
+		try {
+			await confirmPayment({ settlementId: paymentId as any });
+		} catch (err) {
+			toasts.add(err instanceof Error ? err.message : 'Confirm failed', 'error');
 		}
 	}
 </script>
@@ -127,7 +155,7 @@
 			/>
 		</section>
 
-		{#if preview.data}
+		{#if preview.data && state.room.status === 'collecting'}
 			<SettlementPreview
 				transactions={preview.data.transactions}
 				residueCentavos={preview.data.residueCentavos}
@@ -136,6 +164,20 @@
 				profiles={state.profiles}
 				status={state.room.status}
 			/>
+		{/if}
+
+		{#if state.settlements.length > 0}
+			<section>
+				<h2 class="mb-2 font-semibold">Payments</h2>
+				<SettlementList
+					payments={state.settlements}
+					profiles={state.profiles}
+					currentUserId={currentUserId}
+					onMarkPaid={handleMarkPaid}
+					onUnmark={handleUnmark}
+					onConfirm={handleConfirm}
+				/>
+			</section>
 		{/if}
 	</div>
 {/if}
