@@ -7,14 +7,20 @@
 
 	async function signIn() {
 		loading = true;
-		const result = await authClient.signIn.social({
-			provider: 'google',
-			callbackURL: '/'
-		});
-		if (result.error) {
-			toasts.add(result.error.message ?? 'Sign in failed', 'error');
+		try {
+			const result = await authClient.signIn.social({
+				provider: 'google',
+				callbackURL: '/'
+			});
+			if (result.error) {
+				toasts.add(result.error.message ?? 'Sign in failed', 'error');
+			}
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'Sign in failed';
+			toasts.add(message, 'error');
+		} finally {
+			loading = false;
 		}
-		loading = false;
 	}
 </script>
 
