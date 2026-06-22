@@ -21,6 +21,7 @@
 	"dependencies": {
 		"@convex-dev/better-auth": "^0.12.4",
 		"@mmailaender/convex-better-auth-svelte": "^0.8.0",
+		"@mmailaender/convex-svelte": "^0.19.1",
 		"better-auth": "^1.6.20",
 		"convex": "^1.41.0",
 		"convex-svelte": "^0.14.0"
