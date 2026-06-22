@@ -37,7 +37,10 @@ export const getRoomState = query({
 		}
 		const members = await ctx.db.query('roomMembers').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
 		const items = await ctx.db.query('items').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
-		const claims = await ctx.db.query('itemClaims').collect();
+		const claims = await ctx.db
+			.query('itemClaims')
+			.withIndex('roomId', (q) => q.eq('roomId', roomId))
+			.collect();
 		const contributions = await ctx.db.query('contributions').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
 		const settlements = await ctx.db
 			.query('settlementPayments')
@@ -67,14 +70,15 @@ export const previewSettlement = query({
 			throw new Error('Room not found');
 		}
 		const items = await ctx.db.query('items').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
-		const claims = await ctx.db.query('itemClaims').collect();
+		const claims = await ctx.db
+			.query('itemClaims')
+			.withIndex('roomId', (q) => q.eq('roomId', roomId))
+			.collect();
 		const contributions = await ctx.db.query('contributions').withIndex('roomId', (q) => q.eq('roomId', roomId)).collect();
 		const result = computeSettlement(
 			{
 				items: items.map((i) => ({ _id: i._id, name: i.name, priceCentavos: i.priceCentavos, qty: i.qty })),
-				claims: claims
-					.filter((c) => items.some((i) => i._id === c.itemId))
-					.map((c) => ({ itemId: c.itemId, userId: c.userId, shares: c.shares })),
+			claims: claims.map((c) => ({ itemId: c.itemId, userId: c.userId, shares: c.shares })),
 				contributions: contributions.map((c) => ({
 					userId: c.userId,
 					amountCentavos: c.amountCentavos

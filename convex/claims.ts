@@ -35,7 +35,7 @@ export const setClaim = mutation({
 		} else if (existing) {
 			await ctx.db.patch(existing._id, { shares });
 		} else {
-			await ctx.db.insert('itemClaims', { itemId, userId, shares });
+			await ctx.db.insert('itemClaims', { roomId: item.roomId, itemId, userId, shares });
 		}
 		await ctx.db.patch(item.roomId, { lastActivity: Date.now() });
 	}

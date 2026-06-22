@@ -48,10 +48,13 @@ export default defineSchema({
 		.index('roomId', ['roomId']),
 
 	itemClaims: defineTable({
+		roomId: v.id('rooms'),
 		itemId: v.id('items'),
 		userId: v.string(),
 		shares: v.number()
 	})
+		.index('roomId', ['roomId'])
+		.index('roomId_userId', ['roomId', 'userId'])
 		.index('itemId_userId', ['itemId', 'userId'])
 		.index('itemId', ['itemId'])
 		.index('userId', ['userId']),
