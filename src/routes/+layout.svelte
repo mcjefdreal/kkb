@@ -20,7 +20,9 @@
 		<a href="/join" class="text-slate-600 hover:text-slate-900">Join</a>
 		{#if auth.isAuthenticated}
 			<a href="/profile" class="text-slate-600 hover:text-slate-900">Profile</a>
-			<a href="/logout" class="text-slate-600 hover:text-slate-900">Log out</a>
+			<form action="/logout" method="POST" class="inline">
+				<button type="submit" class="text-slate-600 hover:text-slate-900">Log out</button>
+			</form>
 		{:else}
 			<a href="/login" class="text-slate-600 hover:text-slate-900">Log in</a>
 		{/if}
