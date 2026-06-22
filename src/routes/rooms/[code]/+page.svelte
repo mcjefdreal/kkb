@@ -28,6 +28,17 @@
 	);
 	const editable = $derived(roomState.data?.room.status === 'collecting');
 
+	const creditorsWithoutWallet = $derived(
+		(() => {
+			if (!preview.data || !roomState.data) return [];
+			const payees = new Set(preview.data.transactions.map((t) => t.payeeUserId));
+			return Array.from(payees).filter((userId) => {
+				const p = roomState.data!.profiles[userId];
+				return !p?.gcashNumber && !p?.mayaNumber;
+			});
+		})()
+	);
+
 	async function handleSetClaim(itemId: string, shares: number) {
 		try {
 			await setClaim({ itemId, shares });
@@ -74,12 +85,19 @@
 				<p class="text-xs uppercase text-slate-400">{state.room.status}</p>
 			</div>
 			{#if isCreator && editable}
-				<button
-					onclick={handleFinalize}
-					class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
-				>
-					Lock & settle
-				</button>
+				<div class="text-right">
+					{#if creditorsWithoutWallet.length > 0}
+						<p class="mb-1 text-xs text-amber-700">
+							Warning: creditors without e-wallet may only be paid cash.
+						</p>
+					{/if}
+					<button
+						onclick={handleFinalize}
+						class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
+					>
+						Lock & settle
+					</button>
+				</div>
 			{/if}
 		</div>
 
