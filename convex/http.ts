@@ -38,7 +38,7 @@ http.route({
 		}
 		const url = new URL(request.url);
 		const code = url.searchParams.get('code') ?? '';
-		const room = await ctx.runQuery(api.rooms.getRoomByCode, { code });
+		const room = await ctx.runQuery(api.queries.getRoomByCode, { code });
 		if (!room) {
 			return jsonResponse({ error: 'Room not found' }, 404);
 		}
