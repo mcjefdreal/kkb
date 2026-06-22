@@ -1,4 +1,4 @@
-import { action, mutation, type MutationCtx } from './_generated/server.js';
+import { action, mutation, type MutationCtx, type QueryCtx } from './_generated/server.js';
 import { api } from './_generated/api.js';
 import { creatorMutation, requireContributor, requireMember, getUserId } from './authz.js';
 import { applyResidueToLargestCreditor, computeSettlement } from './settlement.js';
