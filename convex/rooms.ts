@@ -174,6 +174,10 @@ export const leaveRoom = mutation({
 	args: { roomId: v.id('rooms') },
 	handler: async (ctx, { roomId }) => {
 		const { userId, member } = await requireMember(ctx, roomId);
+		const room = await ctx.db.get(roomId);
+		if (!room || room.status !== 'collecting') {
+			throw new Error('Room is not open for leaving');
+		}
 		await ctx.db.delete(member._id);
 		const contribution = await ctx.db
 			.query('contributions')
