@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from '../$types.js';
+import type { PageServerLoad } from './$types.js';
 import { createConvexHttpClient } from '@mmailaender/convex-better-auth-svelte/sveltekit';
 import { api } from '$lib/convex-api.js';
 
