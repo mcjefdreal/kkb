@@ -371,6 +371,7 @@ export const markPaid = mutation({
 		}
 		const status = method === 'cash' ? 'confirmed' : 'pending_confirmation';
 		await ctx.db.patch(settlementId, { method, status, reference });
+		await ctx.db.patch(payment.roomId, { lastActivity: Date.now() });
 	}
 });
 
@@ -389,6 +390,7 @@ export const unmarkPaid = mutation({
 			throw new Error('Only pending-confirmation payments can be unmarked');
 		}
 		await ctx.db.patch(settlementId, { method: 'pending', status: 'pending', reference: undefined });
+		await ctx.db.patch(payment.roomId, { lastActivity: Date.now() });
 	}
 });
 
@@ -407,6 +409,7 @@ export const confirmPayment = mutation({
 			throw new Error('Payment must be pending confirmation');
 		}
 		await ctx.db.patch(settlementId, { status: 'confirmed' });
+		await ctx.db.patch(payment.roomId, { lastActivity: Date.now() });
 		const allPayments = await ctx.db
 			.query('settlementPayments')
 			.withIndex('roomId', (q) => q.eq('roomId', payment.roomId))
