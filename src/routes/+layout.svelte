@@ -2,7 +2,8 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { initConvexAuth } from '$lib/convex.js';
-	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
+	import { useAuth } from '$lib/auth/client.svelte.js';
+	import { authClient } from '$lib/auth-client.js';
 	import Toasts from '$lib/components/Toasts.svelte';
 
 	initConvexAuth();
@@ -20,9 +21,12 @@
 		<a href="/join" class="text-slate-600 hover:text-slate-900">Join</a>
 		{#if auth.isAuthenticated}
 			<a href="/profile" class="text-slate-600 hover:text-slate-900">Profile</a>
-			<form action="/logout" method="POST" class="inline">
-				<button type="submit" class="text-slate-600 hover:text-slate-900">Log out</button>
-			</form>
+			<button
+				onclick={() => authClient.signOut()}
+				class="text-slate-600 hover:text-slate-900"
+			>
+				Log out
+			</button>
 		{:else}
 			<a href="/login" class="text-slate-600 hover:text-slate-900">Log in</a>
 		{/if}
