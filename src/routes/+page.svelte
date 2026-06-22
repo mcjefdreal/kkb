@@ -1,2 +1,19 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	import { useAuth } from '@mmailaender/convex-better-auth-svelte/svelte';
+
+	const auth = useAuth();
+</script>
+
+<div class="py-12 text-center">
+	<h1 class="mb-4 text-4xl font-bold">KKB</h1>
+	<p class="mb-8 text-lg text-slate-600">Split bills with friends. No math, no drama.</p>
+	{#if auth.isAuthenticated}
+		<a href="/dashboard" class="rounded-lg bg-slate-900 px-6 py-3 text-white hover:bg-slate-800">
+			Go to dashboard
+		</a>
+	{:else}
+		<a href="/login" class="rounded-lg bg-slate-900 px-6 py-3 text-white hover:bg-slate-800">
+			Sign in with Google
+		</a>
+	{/if}
+</div>
