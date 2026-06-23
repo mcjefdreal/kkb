@@ -2,6 +2,7 @@
 	import { authClient } from '$lib/auth-client';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
+	import { friendlyError } from '$lib/errors.js';
 
 	let loading = $state(false);
 
@@ -13,10 +14,10 @@
 				callbackURL: '/'
 			});
 			if (result.error) {
-				toasts.add(result.error.message ?? 'Sign in failed', 'error');
+				toasts.add(friendlyError(result.error, 'Sign in failed'), 'error');
 			}
 		} catch (err) {
-			const message = err instanceof Error ? err.message : 'Sign in failed';
+			const message = friendlyError(err, 'Sign in failed');
 			toasts.add(message, 'error');
 		} finally {
 			loading = false;

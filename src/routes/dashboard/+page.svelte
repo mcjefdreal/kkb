@@ -6,6 +6,7 @@
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
+	import { friendlyError } from '$lib/errors.js';
 	import type { Id } from '../../../convex/_generated/dataModel.js';
 
 	const rooms = useQuery(api.queries.listMyRooms, () => ({}));
@@ -22,7 +23,7 @@
 			await deleteRoom({ roomId });
 			toasts.add('Room deleted', 'success');
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Delete failed', 'error');
+			toasts.add(friendlyError(err, 'Delete failed'), 'error');
 		}
 	}
 </script>

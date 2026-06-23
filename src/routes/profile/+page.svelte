@@ -3,6 +3,7 @@
 	import { api } from '$lib/convex-api.js';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
+	import { friendlyError } from '$lib/errors.js';
 
 	const profile = useQuery(api.queries.getMyProfile, () => ({}));
 	const update = useMutation(api.profiles.updateProfile);
@@ -31,7 +32,7 @@
 			});
 			toasts.add('Profile saved', 'success');
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Save failed', 'error');
+			toasts.add(friendlyError(err, 'Save failed'), 'error');
 		} finally {
 			saving = false;
 		}

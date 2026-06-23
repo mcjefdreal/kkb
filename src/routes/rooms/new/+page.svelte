@@ -7,6 +7,7 @@
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toCentavos, formatPHP } from '$lib/money.js';
 	import { toasts } from '$lib/stores/toast.js';
+	import { friendlyError } from '$lib/errors.js';
 
 	const createRoom = useAction(api.rooms.createRoom);
 
@@ -41,7 +42,7 @@
 		try {
 			ownContributionCentavos = toCentavos(ownContribution);
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Invalid contribution', 'error');
+			toasts.add(friendlyError(err, 'Invalid contribution'), 'error');
 			return;
 		}
 		loading = true;
@@ -54,7 +55,7 @@
 			toasts.add('Room created', 'success');
 			goto(`/rooms/${code}`);
 		} catch (err) {
-			createError = err instanceof Error ? err.message : 'Create failed';
+			createError = friendlyError(err, 'Create failed');
 			toasts.add(createError, 'error');
 			loading = false;
 		}

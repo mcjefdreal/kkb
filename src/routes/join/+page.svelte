@@ -5,6 +5,7 @@
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
+	import { friendlyError } from '$lib/errors.js';
 
 	let code = $state('');
 	let checkedCode = $state<string | null>(null);
@@ -32,7 +33,7 @@
 			toasts.add('Joined room', 'success');
 			goto(`/rooms/${normalized}`);
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Join failed', 'error');
+			toasts.add(friendlyError(err, 'Join failed'), 'error');
 			joining = false;
 		}
 	}
