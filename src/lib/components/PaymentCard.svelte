@@ -69,9 +69,10 @@
 				{#if isPayer}
 					<button
 						onclick={onUnmark}
+						aria-label="Undo payment"
 						class="rounded bg-slate-100 px-2 py-1 text-xs hover:bg-slate-200"
 					>
-						Unmark
+						Undo
 					</button>
 				{/if}
 				{#if isPayee}

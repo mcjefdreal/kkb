@@ -102,7 +102,7 @@
 		try {
 			await unmarkPaid({ settlementId: paymentId as unknown as Id<'settlementPayments'> });
 		} catch (err) {
-			toasts.add(friendlyError(err, 'Unmark failed'), 'error');
+			toasts.add(friendlyError(err, 'Undo failed'), 'error');
 		}
 	}
 

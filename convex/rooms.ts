@@ -388,6 +388,7 @@ export const markPaid = mutation({
 	}
 });
 
+/** Reverts a pending_confirmation payment back to pending. UI label: "Undo". */
 export const unmarkPaid = mutation({
 	args: { settlementId: v.id('settlementPayments') },
 	handler: async (ctx, { settlementId }) => {
@@ -397,10 +398,10 @@ export const unmarkPaid = mutation({
 		}
 		const userId = await getUserId(ctx);
 		if (payment.payerUserId !== userId) {
-			throw new Error('Only the payer can unmark this payment');
+			throw new Error('Only the payer can undo this payment');
 		}
 		if (payment.status !== 'pending_confirmation') {
-			throw new Error('Only pending-confirmation payments can be unmarked');
+			throw new Error('Only pending-confirmation payments can be undone');
 		}
 		await ctx.db.patch(settlementId, { method: 'pending', status: 'pending', reference: undefined });
 		await ctx.db.patch(payment.roomId, { lastActivity: Date.now() });
