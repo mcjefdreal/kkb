@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { toCentavos, formatPHP } from '$lib/money.js';
+	import HelpButton from './HelpButton.svelte';
 
 	interface Props {
 		amountCentavos: number;
@@ -38,6 +39,10 @@
 		}}
 		placeholder="0.00"
 		class="w-28 rounded-lg border border-slate-300 px-2 py-1 text-sm"
+	/>
+	<HelpButton
+		label="Help about contribution limit"
+		text={`Max you can contribute is ${formatPHP(maxCentavos)}.`}
 	/>
 	{#if error}
 		<span class="text-xs text-red-600">{error}</span>

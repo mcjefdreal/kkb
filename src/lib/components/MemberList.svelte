@@ -2,6 +2,7 @@
 	import type { RoomMember, Contribution, Profile } from '$lib/types.js';
 	import { formatPHP } from '$lib/money.js';
 	import ContributionInput from './ContributionInput.svelte';
+	import HelpButton from './HelpButton.svelte';
 
 	interface Props {
 		members: RoomMember[];
@@ -61,6 +62,10 @@
 					>
 						{member.role === 'member' ? 'Make contributor' : 'Demote to member'}
 					</button>
+					<HelpButton
+						label="Help about member roles"
+						text="Contributors can set their own contribution amount. Members can only claim items."
+					/>
 				{/if}
 			</div>
 		</div>

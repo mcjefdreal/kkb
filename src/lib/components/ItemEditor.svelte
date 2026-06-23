@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { toCentavos, formatPHP } from '$lib/money.js';
+	import HelpButton from './HelpButton.svelte';
 
 	export interface ItemInput {
 		name: string;
@@ -102,12 +103,18 @@
 			{/if}
 		</div>
 	{/each}
-	<button
-		type="button"
-		onclick={addRow}
-		class="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50"
-	>
-		+ Add item
-	</button>
+	<div class="flex items-center gap-2">
+		<button
+			type="button"
+			onclick={addRow}
+			class="rounded-lg border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50"
+		>
+			+ Add item
+		</button>
+		<HelpButton
+			label="Help about adding items"
+			text="Add each bill item with a name, price, and quantity. The total is split among contributors."
+		/>
+	</div>
 	<p class="text-right font-semibold">Total: {formatPHP(totalCentavos)}</p>
 </div>

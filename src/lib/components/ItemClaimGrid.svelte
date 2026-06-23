@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Item, ItemClaim, Profile } from '$lib/types.js';
 	import { formatPHP } from '$lib/money.js';
+	import HelpButton from './HelpButton.svelte';
 
 	interface Props {
 		items: Item[];
@@ -45,6 +46,10 @@
 				</div>
 				<div class="flex items-center gap-2">
 					<span class="text-sm">{claimed}/{item.qty} claimed</span>
+					<HelpButton
+						label="Help about claiming items"
+						text="Enter how many of this item you'll cover. Unallocated shares are split by contributions."
+					/>
 					<input
 						type="number"
 						min="0"

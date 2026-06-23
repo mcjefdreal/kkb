@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Profile } from '$lib/types.js';
 	import { formatPHP } from '$lib/money.js';
+	import HelpButton from './HelpButton.svelte';
 
 	interface Transaction {
 		payerUserId: string;
@@ -39,6 +40,10 @@
 
 	<div class="mb-3 flex items-center gap-2 text-sm">
 		<span>Funding:</span>
+		<HelpButton
+			label="Help about funding status"
+			text="Under = total contributions are less than the bill. Over = there's extra to return. Exact = balanced."
+		/>
 		{#if fundingStatus === 'exact'}
 			<span class="font-medium text-green-700">exact</span>
 		{:else if fundingStatus === 'under'}

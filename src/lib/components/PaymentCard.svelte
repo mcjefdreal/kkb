@@ -2,6 +2,7 @@
 	import type { SettlementPayment, Profile } from '$lib/types.js';
 	import { paymentMethodLabel, paymentStatusLabel } from '$lib/labels.js';
 	import { formatPHP } from '$lib/money.js';
+	import HelpButton from './HelpButton.svelte';
 
 	interface Props {
 		payment: SettlementPayment;
@@ -27,7 +28,13 @@
 			<p class="font-medium">
 				{profiles[payment.payerUserId]?.displayName ?? 'Unknown'} → {payee?.displayName ?? 'Unknown'}
 			</p>
-			<p class="text-xs text-slate-500">{paymentStatusLabel[payment.status]}</p>
+			<p class="flex items-center gap-1 text-xs text-slate-500">
+				{paymentStatusLabel[payment.status]}
+				<HelpButton
+					label="Help about payment status"
+					text="The payer picks a method and marks it sent. The payee then confirms receipt. Cash and e-wallets both require payee confirmation."
+				/>
+			</p>
 			{#if payment.method !== 'pending'}
 				<p class="text-xs text-slate-500">{paymentMethodLabel[payment.method]}</p>
 			{/if}
@@ -66,23 +73,29 @@
 					<p class="mt-1 text-xs text-amber-600">Payee has no e-wallet configured.</p>
 				{/if}
 			{:else if payment.status === 'pending_confirmation'}
-				{#if isPayer}
-					<button
-						onclick={onUnmark}
-						aria-label="Undo payment"
-						class="rounded bg-slate-100 px-2 py-1 text-xs hover:bg-slate-200"
-					>
-						Undo
-					</button>
-				{/if}
-				{#if isPayee}
-					<button
-						onclick={onConfirm}
-						class="rounded bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-700"
-					>
-						Confirm
-					</button>
-				{/if}
+				<div class="mt-2 flex items-center justify-end gap-2">
+					<HelpButton
+						label="Help about undo and confirm"
+						text="Payer: Undo reverts the payment to pending. Payee: Confirm marks the payment as received."
+					/>
+					{#if isPayer}
+						<button
+							onclick={onUnmark}
+							aria-label="Undo payment"
+							class="rounded bg-slate-100 px-2 py-1 text-xs hover:bg-slate-200"
+						>
+							Undo
+						</button>
+					{/if}
+					{#if isPayee}
+						<button
+							onclick={onConfirm}
+							class="rounded bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-700"
+						>
+							Confirm
+						</button>
+					{/if}
+				</div>
 			{/if}
 		</div>
 	</div>

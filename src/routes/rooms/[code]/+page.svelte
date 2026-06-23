@@ -11,6 +11,7 @@
 	import SettlementList from '$lib/components/SettlementList.svelte';
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
+	import HelpButton from '$lib/components/HelpButton.svelte';
 	import { toasts } from '$lib/stores/toast.js';
 	import type { Id } from '../../../convex/_generated/dataModel.js';
 
@@ -136,7 +137,13 @@
 			<div>
 				<h1 class="text-2xl font-bold">{state.room.name}</h1>
 				<p class="font-mono text-sm text-slate-500">Code: {data.code}</p>
-				<p class="text-xs uppercase text-slate-400">{roomStatusLabel[state.room.status]}</p>
+				<p class="flex items-center gap-1 text-xs uppercase text-slate-400">
+					{roomStatusLabel[state.room.status]}
+					<HelpButton
+						label="Help about room status"
+						text="Collecting = adding items and contributions. Settling = payments in progress. Settled = all payments confirmed."
+					/>
+				</p>
 				{#if paymentProgress.total > 0}
 					<p class="text-xs text-slate-500">
 						Payments: {paymentProgress.paid}/{paymentProgress.total} paid
@@ -150,12 +157,18 @@
 							Warning: creditors without e-wallet may only be paid cash.
 						</p>
 					{/if}
-					<button
-						onclick={handleFinalize}
-						class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
-					>
-						Lock & settle
-					</button>
+					<div class="flex items-center justify-end gap-2">
+						<button
+							onclick={handleFinalize}
+							class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
+						>
+							Lock & settle
+						</button>
+						<HelpButton
+							label="Help about locking the room"
+							text="Locks the room, computes who owes whom, and starts payments. You can only reopen while no payments are in progress."
+						/>
+					</div>
 				</div>
 			{/if}
 			{#if isCreator && state.room.status === 'settled'}
