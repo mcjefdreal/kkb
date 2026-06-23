@@ -70,7 +70,7 @@
 		<p class="text-sm text-slate-500">No payments needed.</p>
 	{/if}
 
-	{#if residueCentavos > 0}
+	<!-- {#if residueCentavos > 0}
 		<p class="mt-2 text-xs text-slate-500">{residueCentavos} assigned to largest creditor.</p>
-	{/if}
+	{/if} -->
 </div>
