@@ -20,6 +20,15 @@ export default defineConfig({
 			'/api/auth': {
 				target: 'https://upbeat-axolotl-779.convex.site',
 				changeOrigin: true
+			},
+			'/api/bot': {
+				target: 'https://upbeat-axolotl-779.convex.site',
+				changeOrigin: true
+			},
+			'/api': {
+				target: 'https://upbeat-axolotl-779.convex.cloud',
+				changeOrigin: true,
+				ws: true
 			}
 		}
 	}
