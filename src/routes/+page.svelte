@@ -6,7 +6,7 @@
 
 <div class="py-12 text-center">
 	<h1 class="mb-4 text-4xl font-bold">KKB</h1>
-	<p class="mb-8 text-lg text-slate-600">Split bills with friends. No math, no drama.</p>
+	<p class="mb-8 text-lg text-slate-600">No more utang. Enjoy lang.</p>
 	{#if auth.isAuthenticated}
 		<a href="/dashboard" class="rounded-lg bg-slate-900 px-6 py-3 text-white hover:bg-slate-800">
 			Go to dashboard
