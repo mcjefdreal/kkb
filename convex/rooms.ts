@@ -382,12 +382,9 @@ export const markPaid = mutation({
 				throw new Error(`Payee has not configured ${method} number`);
 			}
 		}
-		const status = method === 'cash' ? 'paid' : 'pending_confirmation';
+		const status = 'pending_confirmation';
 		await ctx.db.patch(settlementId, { method, status, reference });
 		await ctx.db.patch(payment.roomId, { lastActivity: Date.now() });
-		if (status === 'paid') {
-			await checkAndSettleRoom(ctx, payment.roomId);
-		}
 	}
 });
 
@@ -437,8 +434,8 @@ export const reopenRoom = mutation({
 			.query('settlementPayments')
 			.withIndex('roomId', (q) => q.eq('roomId', roomId))
 			.collect();
-		if (payments.some((p) => p.status === 'paid')) {
-			throw new Error('Cannot reopen: some payments are already paid');
+		if (payments.some((p) => p.status === 'paid' || p.status === 'pending_confirmation')) {
+			throw new Error('Cannot reopen: some payments are in progress');
 		}
 		for (const payment of payments) {
 			await ctx.db.delete(payment._id);
