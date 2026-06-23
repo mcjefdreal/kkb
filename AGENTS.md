@@ -6,7 +6,8 @@ with `sv create`; no tests, no CI, no deploy target configured yet.
 ## Commands
 
 - `pnpm dev` — Vite dev server.
-- `pnpm build` — production build (uses `@sveltejs/adapter-auto`).
+- `pnpm build` — production build (uses `@sveltejs/adapter-node`).
+- `pnpm start` — run the production Node server.
 - `pnpm preview` — preview the build.
 - `pnpm check` — runs `svelte-kit sync && svelte-check`. Sync must run first;
   it regenerates `.svelte-kit/` (gitignored) including the extended tsconfig.
@@ -32,10 +33,47 @@ with `sv create`; no tests, no CI, no deploy target configured yet.
 - **pnpm `allowBuilds`.** `pnpm-workspace.yaml` whitelists native builds for
   `@tailwindcss/oxide` and `esbuild`. Keep this list in sync if a new native
   dep is added — pnpm will otherwise prompt or block the install.
-- **`.npmrc` has `engine-strict=true`.** No `engines` field in `package.json`
-  yet; add one intentionally rather than letting pnpm warn.
-- **Adapter is `adapter-auto`.** If deploying to an unsupported host, swap
-  adapters in `vite.config.ts` (see comment there).
+- **`.npmrc` has `engine-strict=true`.** `package.json` already has an `engines`
+  field (node>=20, pnpm>=9); keep it in sync.
+- **Adapter is `@sveltejs/adapter-node`.** The build output is a standalone Node
+  server. See `docker-compose.yml` for the Caddy + Docker Compose production
+  setup.
+
+## Deployment
+
+- **Target: Convex Cloud + Caddy + Docker Compose.** The app is built with
+  `@sveltejs/adapter-node` and served behind Caddy on a single public domain.
+  Caddy proxies `/api/auth/*` and `/api/bot/*` to the Convex site origin,
+  `/api` and `/api/*` (including the WebSocket handshake) to the Convex cloud
+  origin, and everything else to the SvelteKit Node app.
+- **`PUBLIC_CONVEX_URL` is build-time.** SvelteKit inlines `$env/static/public`
+  during `vite build`. The Dockerfile accepts `PUBLIC_CONVEX_URL` as a build
+  argument (derived from `DOMAIN` in `docker-compose.yml`) and writes it to
+  `.env.production` before building. Changing domains requires a rebuild.
+- **Three distinct env surfaces:**
+  - Server `.env` (from `.env.production.example`): `DOMAIN`,
+    `CONVEX_CLOUD_URL`, `CONVEX_SITE_URL`.
+  - Convex Cloud backend env (set via `npx convex env set` on the production
+    deployment): `SITE_URL`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`,
+    `GOOGLE_CLIENT_SECRET`, `BOT_API_KEY`.
+  - CLI `.env.local` (deploy machine): `CONVEX_DEPLOYMENT=prod:<name>`.
+- **Set `SITE_URL` before the first production deploy.** BetterAuth derives the
+  session cookie domain from it. If the first deploy runs without it, cookies
+  are issued for `.convex.site` and login on the public domain fails. Changing
+  `SITE_URL` later requires `npx convex deploy` because it is read at module
+  load time in `convex/betterAuth/auth.ts`.
+- **Server-side Convex calls resolve locally.** `src/lib/loaders/roomGuard.ts`
+  calls `https://<DOMAIN>/api/*` from inside the app container. The compose file
+  adds `extra_hosts: ["${DOMAIN}:host-gateway"]` so the container resolves the
+  domain to the Docker host and reaches Caddy locally, avoiding public-DNS
+  hairpin issues.
+- **Google OAuth redirect URI:** must exactly match
+  `https://<DOMAIN>/api/auth/callback/google` in the production Google OAuth
+  client.
+- **WebSocket origin:** Caddy forwards `Origin: https://<DOMAIN>` to Convex
+  Cloud. If live queries fail with a 403 on the WebSocket handshake, add the
+  domain to the allowed origins list in the Convex dashboard for the production
+  deployment.
 
 ## Layout
 
@@ -90,6 +128,22 @@ with `sv create`; no tests, no CI, no deploy target configured yet.
 1. `pnpm check`
 2. `pnpm lint`
 3. `pnpm build` (catches adapter / SSR issues that `dev` hides)
+
+## Pre-deploy verification checklist
+
+Before a production deploy is considered done:
+
+1. DNS for `<DOMAIN>` resolves to the server public IP.
+2. `pnpm check`, `pnpm lint`, and `pnpm build` pass locally.
+3. `docker compose config` exits cleanly.
+4. `npx convex env set SITE_URL https://<DOMAIN>` (and the other backend env vars)
+   ran before the first `npx convex deploy`.
+5. The Google OAuth redirect URI `https://<DOMAIN>/api/auth/callback/google` is
+   configured.
+6. After `docker compose up -d --build`:
+   - `curl https://<DOMAIN>/api/bot/health` returns `{ ok: true }`.
+   - Google login succeeds and the session cookie is `Secure` + `SameSite=Lax`.
+   - Live queries (WebSocket) work without 403 errors.
 
 <!-- convex-ai-start -->
 
