@@ -30,6 +30,12 @@
 	<input
 		bind:value
 		onblur={submit}
+		onkeydown={(e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				submit();
+			}
+		}}
 		placeholder="0.00"
 		class="w-28 rounded-lg border border-slate-300 px-2 py-1 text-sm"
 	/>
