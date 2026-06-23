@@ -29,7 +29,7 @@
 			</p>
 			<p class="text-xs text-slate-500">{paymentStatusLabel[payment.status]}</p>
 			{#if payment.method !== 'pending'}
-				<p class="text-xs text-slate-400">{paymentMethodLabel[payment.method]}</p>
+				<p class="text-xs text-slate-500">{paymentMethodLabel[payment.method]}</p>
 			{/if}
 			{#if payment.reference}
 				<p class="text-xs text-slate-400">Ref: {payment.reference}</p>
