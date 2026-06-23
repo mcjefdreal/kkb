@@ -45,7 +45,7 @@ export interface Contribution {
 }
 
 export type PaymentMethod = 'pending' | 'cash' | 'gcash' | 'maya';
-export type PaymentStatus = 'pending' | 'pending_confirmation' | 'confirmed';
+export type PaymentStatus = 'pending' | 'pending_confirmation' | 'confirmed' | 'paid';
 
 export interface SettlementPayment {
 	_id: string;

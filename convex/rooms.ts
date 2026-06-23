@@ -462,3 +462,16 @@ export const deleteRoom = mutation({
 		await ctx.db.delete(roomId);
 	})
 });
+
+export const migrateConfirmedToPaid = mutation({
+	args: {},
+	handler: async (ctx) => {
+		await getUserId(ctx);
+		const payments = await ctx.db.query('settlementPayments').collect();
+		for (const payment of payments) {
+			if (payment.status === 'confirmed') {
+				await ctx.db.patch(payment._id, { status: 'paid' });
+			}
+		}
+	}
+});
