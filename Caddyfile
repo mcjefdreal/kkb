@@ -1,0 +1,16 @@
+{$DOMAIN} {
+	encode zstd gzip
+
+	route {
+		@api path /api/auth /api/auth/*
+		reverse_proxy @api convex-backend:3211
+
+		@bot path /api/bot /api/bot/*
+		reverse_proxy @bot convex-backend:3211
+
+		@convex path /api /api/*
+		reverse_proxy @convex convex-backend:3210
+
+		reverse_proxy app:3000
+	}
+}
