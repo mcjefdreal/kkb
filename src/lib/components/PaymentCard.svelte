@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { SettlementPayment, Profile } from '$lib/types.js';
-	import { paymentStatusLabel } from '$lib/labels.js';
+	import { paymentMethodLabel, paymentStatusLabel } from '$lib/labels.js';
 	import { formatPHP } from '$lib/money.js';
 
 	interface Props {
@@ -28,6 +28,9 @@
 				{profiles[payment.payerUserId]?.displayName ?? 'Unknown'} → {payee?.displayName ?? 'Unknown'}
 			</p>
 			<p class="text-xs text-slate-500">{paymentStatusLabel[payment.status]}</p>
+			{#if payment.method !== 'pending'}
+				<p class="text-xs text-slate-400">{paymentMethodLabel[payment.method]}</p>
+			{/if}
 			{#if payment.reference}
 				<p class="text-xs text-slate-400">Ref: {payment.reference}</p>
 			{/if}
