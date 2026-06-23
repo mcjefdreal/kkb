@@ -18,18 +18,19 @@
 		status: string;
 	}
 
-	let { transactions, residueCentavos, unclaimedItems, fundingGap, profiles, status }: Props = $props();
+	let { transactions, residueCentavos, unclaimedItems, fundingGap, profiles, status }: Props =
+		$props();
 
-	const fundingStatus = $derived(
-		fundingGap > 0 ? 'under' : fundingGap < 0 ? 'over' : 'exact'
-	);
+	const fundingStatus = $derived(fundingGap > 0 ? 'under' : fundingGap < 0 ? 'over' : 'exact');
 </script>
 
 <div class="rounded-lg border border-slate-200 p-4">
 	<h2 class="mb-3 font-semibold">Settlement preview</h2>
 
 	{#if status === 'collecting'}
-		<div class="mb-3 text-sm text-slate-500">This is a live preview; claims and contributions can still change.</div>
+		<div class="mb-3 text-sm text-slate-500">
+			This is a live preview; claims and contributions can still change.
+		</div>
 	{/if}
 
 	{#if unclaimedItems.length > 0}
@@ -58,7 +59,8 @@
 			{#each transactions as t (t.payerUserId + t.payeeUserId)}
 				<li class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm">
 					<span>
-						{profiles[t.payerUserId]?.displayName ?? 'Unknown'} → {profiles[t.payeeUserId]?.displayName ?? 'Unknown'}
+						{profiles[t.payerUserId]?.displayName ?? 'Unknown'} → {profiles[t.payeeUserId]
+							?.displayName ?? 'Unknown'}
 					</span>
 					<span class="font-medium">{formatPHP(t.amountCentavos)}</span>
 				</li>
@@ -69,6 +71,6 @@
 	{/if}
 
 	{#if residueCentavos > 0}
-		<p class="mt-2 text-xs text-slate-500">1¢ residue assigned to largest creditor.</p>
+		<p class="mt-2 text-xs text-slate-500">{residueCentavos} assigned to largest creditor.</p>
 	{/if}
 </div>
