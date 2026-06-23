@@ -6,6 +6,7 @@
 	import MemberList from '$lib/components/MemberList.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
+	import { friendlyError } from '$lib/errors.js';
 
 	let { data } = $props();
 	const auth = useAuth();
@@ -33,7 +34,7 @@
 		try {
 			await setContribution({ roomId: data.roomId, amountCentavos });
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Contribution failed', 'error');
+			toasts.add(friendlyError(err, 'Contribution failed'), 'error');
 		}
 	}
 
@@ -41,7 +42,7 @@
 		try {
 			await setRole({ roomId: data.roomId, targetUserId, role });
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Role change failed', 'error');
+			toasts.add(friendlyError(err, 'Role change failed'), 'error');
 		}
 	}
 
@@ -50,7 +51,7 @@
 			await reopen({ roomId: data.roomId });
 			toasts.add('Room reopened', 'success');
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Reopen failed', 'error');
+			toasts.add(friendlyError(err, 'Reopen failed'), 'error');
 		}
 	}
 
@@ -61,7 +62,7 @@
 			toasts.add('Room deleted', 'success');
 			goto('/dashboard');
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Delete failed', 'error');
+			toasts.add(friendlyError(err, 'Delete failed'), 'error');
 		}
 	}
 
@@ -72,7 +73,7 @@
 			toasts.add('Left room', 'success');
 			goto('/dashboard');
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Leave failed', 'error');
+			toasts.add(friendlyError(err, 'Leave failed'), 'error');
 		}
 	}
 </script>
