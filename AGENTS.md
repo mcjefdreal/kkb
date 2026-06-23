@@ -66,13 +66,24 @@ with `sv create`; no tests, no CI, no deploy target configured yet.
   that flips a room to `settled` once every payment is `paid`. It is called from
   both `markPaid` (cash path) and `confirmPayment`, which fixes the previous bug
   where a cash-as-last-payment left the room stuck on `settling`.
-- Status labels live in `src/lib/labels.ts` (`roomStatusLabel`,
-  `paymentStatusLabel`) so UI wording doesn't drift.
+- Status and method labels live in `src/lib/labels.ts` (`roomStatusLabel`,
+  `paymentStatusLabel`, `paymentMethodLabel`) so UI wording doesn't drift.
 - Room deletion is creator-only (enforced server-side by `creatorMutation`):
   - dashboard room list: per-row Delete button for creators;
   - room page: Delete button appears when `status === 'settled'`;
   - settings page: existing Delete button remains available to creators at any
     status.
+
+## Error handling
+
+- `src/lib/errors.ts` exports `friendlyError(err, fallback)`, the single place
+  that translates server-side and client-side error strings into user-facing
+  toast messages.
+- All mutation/action catch blocks that surface errors via `toasts.add` must use
+  `friendlyError`. Add any new server error strings to the table in
+  `src/lib/errors.ts`.
+- Inline field-validation messages (e.g. in `ContributionInput.svelte` and
+  `ItemEditor.svelte`) stay raw; they are already user-facing and contextual.
 
 ## Pre-PR checklist
 
