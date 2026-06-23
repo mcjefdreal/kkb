@@ -21,12 +21,6 @@ services:
       - caddy-net
     extra_hosts:
       - "${DOMAIN}:host-gateway"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3001/"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
 
 networks:
   caddy-net:
