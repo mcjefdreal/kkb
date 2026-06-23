@@ -76,7 +76,6 @@ export default defineSchema({
 		status: v.union(
 			v.literal('pending'),
 			v.literal('pending_confirmation'),
-			v.literal('confirmed'),
 			v.literal('paid')
 		),
 		reference: v.optional(v.string()),

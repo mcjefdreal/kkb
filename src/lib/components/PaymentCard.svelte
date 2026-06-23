@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { SettlementPayment, Profile } from '$lib/types.js';
+	import { paymentStatusLabel } from '$lib/labels.js';
 	import { formatPHP } from '$lib/money.js';
 
 	interface Props {
@@ -19,11 +20,7 @@
 	const hasGcash = !!payee?.gcashNumber;
 	const hasMaya = !!payee?.mayaNumber;
 
-	const statusLabel: Record<string, string> = {
-		pending: 'Pending',
-		pending_confirmation: 'Awaiting confirmation',
-		confirmed: 'Confirmed'
-	};
+
 </script>
 
 <div class="rounded-lg border border-slate-200 p-4">
@@ -32,7 +29,7 @@
 			<p class="font-medium">
 				{profiles[payment.payerUserId]?.displayName ?? 'Unknown'} → {payee?.displayName ?? 'Unknown'}
 			</p>
-			<p class="text-xs text-slate-500">{statusLabel[payment.status]}</p>
+			<p class="text-xs text-slate-500">{paymentStatusLabel[payment.status]}</p>
 			{#if payment.reference}
 				<p class="text-xs text-slate-400">Ref: {payment.reference}</p>
 			{/if}

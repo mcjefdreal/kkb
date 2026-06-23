@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { useQuery, useMutation } from 'convex-svelte';
 	import { useAuth } from '$lib/auth/client.svelte.js';
 	import { api } from '$lib/convex-api.js';
+	import { roomStatusLabel } from '$lib/labels.js';
 	import ItemClaimGrid from '$lib/components/ItemClaimGrid.svelte';
 	import MemberList from '$lib/components/MemberList.svelte';
 	import SettlementPreview from '$lib/components/SettlementPreview.svelte';
@@ -24,6 +26,7 @@
 	const markPaid = useMutation(api.rooms.markPaid);
 	const unmarkPaid = useMutation(api.rooms.unmarkPaid);
 	const confirmPayment = useMutation(api.rooms.confirmPayment);
+	const deleteRoom = useMutation(api.rooms.deleteRoom);
 
 	const currentUserId = $derived(auth.user?.id ?? '');
 	const isCreator = $derived(
@@ -36,10 +39,10 @@
 	const paymentProgress = $derived(
 		roomState.data
 			? {
-					confirmed: roomState.data.settlements.filter((p) => p.status === 'confirmed').length,
+					paid: roomState.data.settlements.filter((p) => p.status === 'paid').length,
 					total: roomState.data.settlements.length
 				}
-			: { confirmed: 0, total: 0 }
+			: { paid: 0, total: 0 }
 	);
 
 	const creditorsWithoutWallet = $derived(
@@ -109,6 +112,17 @@
 			toasts.add(err instanceof Error ? err.message : 'Confirm failed', 'error');
 		}
 	}
+
+	async function handleDeleteRoom() {
+		if (!confirm('Delete this room permanently?')) return;
+		try {
+			await deleteRoom({ roomId: data.roomId });
+			toasts.add('Room deleted', 'success');
+			goto('/dashboard');
+		} catch (err) {
+			toasts.add(err instanceof Error ? err.message : 'Delete failed', 'error');
+		}
+	}
 </script>
 
 {#if roomState.isLoading || !roomState.data}
@@ -121,10 +135,10 @@
 			<div>
 				<h1 class="text-2xl font-bold">{state.room.name}</h1>
 				<p class="font-mono text-sm text-slate-500">Code: {data.code}</p>
-				<p class="text-xs uppercase text-slate-400">{state.room.status}</p>
+				<p class="text-xs uppercase text-slate-400">{roomStatusLabel[state.room.status]}</p>
 				{#if paymentProgress.total > 0}
 					<p class="text-xs text-slate-500">
-						Payments: {paymentProgress.confirmed}/{paymentProgress.total} confirmed
+						Payments: {paymentProgress.paid}/{paymentProgress.total} paid
 					</p>
 				{/if}
 			</div>
@@ -140,6 +154,16 @@
 						class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
 					>
 						Lock & settle
+					</button>
+				</div>
+			{/if}
+			{#if isCreator && state.room.status === 'settled'}
+				<div class="text-right">
+					<button
+						onclick={handleDeleteRoom}
+						class="rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+					>
+						Delete room
 					</button>
 				</div>
 			{/if}

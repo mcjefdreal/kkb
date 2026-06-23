@@ -42,7 +42,8 @@ with `sv create`; no tests, no CI, no deploy target configured yet.
 - `src/routes/+layout.svelte` — root layout, imports `layout.css` and the
   favicon from `$lib/assets/`.
 - `src/routes/+page.svelte` — single page (placeholder content).
-- `src/lib/` — `$lib` alias root; currently empty except for `assets/`.
+- `src/lib/` — `$lib` alias root; holds `assets/`, shared helpers like
+  `labels.ts`, and reusable components.
 - `src/app.html`, `src/app.d.ts` — SvelteKit shell and ambient types.
 - `static/` — served as-is (Prettier-ignored).
 - `.svelte-kit/` — generated; do not edit, do not commit.
@@ -53,6 +54,25 @@ with `sv create`; no tests, no CI, no deploy target configured yet.
 - ESLint uses `typescript-eslint` recommended + `svelte` recommended;
   `no-undef` is off (TS handles it). `eslint-config-prettier` last, so
   Prettier wins on formatting disputes.
+
+## Settlement / rooms domain notes
+
+- `rooms.status` is `collecting | settling | settled`. `settled` is displayed as
+  "All payments settled".
+- `settlementPayments.status` is `pending | pending_confirmation | paid`. Cash
+  goes straight to `paid`; e-wallets go `pending_confirmation` until the payee
+  confirms, then `paid`.
+- `checkAndSettleRoom(ctx, roomId)` in `convex/rooms.ts` is the single place
+  that flips a room to `settled` once every payment is `paid`. It is called from
+  both `markPaid` (cash path) and `confirmPayment`, which fixes the previous bug
+  where a cash-as-last-payment left the room stuck on `settling`.
+- Status labels live in `src/lib/labels.ts` (`roomStatusLabel`,
+  `paymentStatusLabel`) so UI wording doesn't drift.
+- Room deletion is creator-only (enforced server-side by `creatorMutation`):
+  - dashboard room list: per-row Delete button for creators;
+  - room page: Delete button appears when `status === 'settled'`;
+  - settings page: existing Delete button remains available to creators at any
+    status.
 
 ## Pre-PR checklist
 

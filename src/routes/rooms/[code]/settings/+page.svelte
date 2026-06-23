@@ -26,7 +26,7 @@
 	);
 	const canReopen = $derived(
 		isCreator && roomState.data?.room.status === 'settling' &&
-		!roomState.data.settlements.some((p) => p.status === 'confirmed')
+		!roomState.data.settlements.some((p) => p.status === 'paid')
 	);
 
 	async function handleSetContribution(amountCentavos: number) {

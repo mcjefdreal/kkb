@@ -341,6 +341,16 @@ export const finalizeSettlement = mutation({
 	})
 });
 
+async function checkAndSettleRoom(ctx: MutationCtx, roomId: Id<'rooms'>) {
+	const allPayments = await ctx.db
+		.query('settlementPayments')
+		.withIndex('roomId', (q) => q.eq('roomId', roomId))
+		.collect();
+	if (allPayments.length > 0 && allPayments.every((p) => p.status === 'paid')) {
+		await ctx.db.patch(roomId, { status: 'settled', lastActivity: Date.now() });
+	}
+}
+
 export const markPaid = mutation({
 	args: {
 		settlementId: v.id('settlementPayments'),
@@ -372,9 +382,12 @@ export const markPaid = mutation({
 				throw new Error(`Payee has not configured ${method} number`);
 			}
 		}
-		const status = method === 'cash' ? 'confirmed' : 'pending_confirmation';
+		const status = method === 'cash' ? 'paid' : 'pending_confirmation';
 		await ctx.db.patch(settlementId, { method, status, reference });
 		await ctx.db.patch(payment.roomId, { lastActivity: Date.now() });
+		if (status === 'paid') {
+			await checkAndSettleRoom(ctx, payment.roomId);
+		}
 	}
 });
 
@@ -411,15 +424,9 @@ export const confirmPayment = mutation({
 		if (payment.status !== 'pending_confirmation') {
 			throw new Error('Payment must be pending confirmation');
 		}
-		await ctx.db.patch(settlementId, { status: 'confirmed' });
+		await ctx.db.patch(settlementId, { status: 'paid' });
 		await ctx.db.patch(payment.roomId, { lastActivity: Date.now() });
-		const allPayments = await ctx.db
-			.query('settlementPayments')
-			.withIndex('roomId', (q) => q.eq('roomId', payment.roomId))
-			.collect();
-		if (allPayments.every((p) => p.status === 'confirmed')) {
-			await ctx.db.patch(payment.roomId, { status: 'settled', lastActivity: Date.now() });
-		}
+		await checkAndSettleRoom(ctx, payment.roomId);
 	}
 });
 
@@ -430,8 +437,8 @@ export const reopenRoom = mutation({
 			.query('settlementPayments')
 			.withIndex('roomId', (q) => q.eq('roomId', roomId))
 			.collect();
-		if (payments.some((p) => p.status === 'confirmed')) {
-			throw new Error('Cannot reopen: some payments are already confirmed');
+		if (payments.some((p) => p.status === 'paid')) {
+			throw new Error('Cannot reopen: some payments are already paid');
 		}
 		for (const payment of payments) {
 			await ctx.db.delete(payment._id);
@@ -463,15 +470,4 @@ export const deleteRoom = mutation({
 	})
 });
 
-export const migrateConfirmedToPaid = mutation({
-	args: {},
-	handler: async (ctx) => {
-		await getUserId(ctx);
-		const payments = await ctx.db.query('settlementPayments').collect();
-		for (const payment of payments) {
-			if (payment.status === 'confirmed') {
-				await ctx.db.patch(payment._id, { status: 'paid' });
-			}
-		}
-	}
-});
+
