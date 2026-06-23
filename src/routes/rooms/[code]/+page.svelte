@@ -4,6 +4,7 @@
 	import { useAuth } from '$lib/auth/client.svelte.js';
 	import { api } from '$lib/convex-api.js';
 	import { roomStatusLabel } from '$lib/labels.js';
+	import { friendlyError } from '$lib/errors.js';
 	import ItemClaimGrid from '$lib/components/ItemClaimGrid.svelte';
 	import MemberList from '$lib/components/MemberList.svelte';
 	import SettlementPreview from '$lib/components/SettlementPreview.svelte';
@@ -60,7 +61,7 @@
 		try {
 			await setClaim({ itemId, shares });
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Claim failed', 'error');
+			toasts.add(friendlyError(err, 'Claim failed'), 'error');
 		}
 	}
 
@@ -68,7 +69,7 @@
 		try {
 			await setContribution({ roomId: data.roomId, amountCentavos });
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Contribution failed', 'error');
+			toasts.add(friendlyError(err, 'Contribution failed'), 'error');
 		}
 	}
 
@@ -76,7 +77,7 @@
 		try {
 			await setRole({ roomId: data.roomId, targetUserId, role });
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Role change failed', 'error');
+			toasts.add(friendlyError(err, 'Role change failed'), 'error');
 		}
 	}
 
@@ -85,7 +86,7 @@
 			await finalize({ roomId: data.roomId });
 			toasts.add('Room locked for settlement', 'success');
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Finalize failed', 'error');
+			toasts.add(friendlyError(err, 'Finalize failed'), 'error');
 		}
 	}
 
@@ -93,7 +94,7 @@
 		try {
 			await markPaid({ settlementId: paymentId as unknown as Id<'settlementPayments'>, method });
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Payment failed', 'error');
+			toasts.add(friendlyError(err, 'Payment failed'), 'error');
 		}
 	}
 
@@ -101,7 +102,7 @@
 		try {
 			await unmarkPaid({ settlementId: paymentId as unknown as Id<'settlementPayments'> });
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Unmark failed', 'error');
+			toasts.add(friendlyError(err, 'Unmark failed'), 'error');
 		}
 	}
 
@@ -109,7 +110,7 @@
 		try {
 			await confirmPayment({ settlementId: paymentId as unknown as Id<'settlementPayments'> });
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Confirm failed', 'error');
+			toasts.add(friendlyError(err, 'Confirm failed'), 'error');
 		}
 	}
 
@@ -120,7 +121,7 @@
 			toasts.add('Room deleted', 'success');
 			goto('/dashboard');
 		} catch (err) {
-			toasts.add(err instanceof Error ? err.message : 'Delete failed', 'error');
+			toasts.add(friendlyError(err, 'Delete failed'), 'error');
 		}
 	}
 </script>
