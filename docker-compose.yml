@@ -1,0 +1,48 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - DOMAIN=${DOMAIN:?DOMAIN is required}
+      - CONVEX_CLOUD_URL=${CONVEX_CLOUD_URL:?CONVEX_CLOUD_URL is required}
+      - CONVEX_SITE_URL=${CONVEX_SITE_URL:?CONVEX_SITE_URL is required}
+    depends_on:
+      app:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      args:
+        PUBLIC_CONVEX_URL: https://${DOMAIN}
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - ORIGIN=https://${DOMAIN}
+      - PROTOCOL_HEADER=x-forwarded-proto
+      - ADDRESS_HEADER=x-forwarded-for
+      - XFF_DEPTH=1
+      - HOST=0.0.0.0
+      - PORT=3000
+      - SHUTDOWN_TIMEOUT=30
+    expose:
+      - "3000"
+    extra_hosts:
+      - "${DOMAIN}:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  caddy_data:
+  caddy_config:
