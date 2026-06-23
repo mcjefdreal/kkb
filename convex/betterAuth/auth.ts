@@ -7,7 +7,6 @@ import authConfig from '../auth.config.js';
 
 const siteUrl = process.env.SITE_URL!;
 
-// @ts-expect-error ComponentApi generated types require `npx convex dev` to populate adapter
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
 export const createAuthOptions = (ctx: GenericCtx<DataModel>): BetterAuthOptions => ({

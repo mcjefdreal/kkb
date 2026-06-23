@@ -5,7 +5,7 @@ import { authComponent, createAuth } from './betterAuth/auth.js';
 
 const http = httpRouter();
 
-authComponent.registerRoutes(http, createAuth);
+authComponent.registerRoutes(http, createAuth, { cors: true });
 
 function jsonResponse(body: unknown, status = 200) {
 	return new Response(JSON.stringify(body), {

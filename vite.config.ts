@@ -14,5 +14,13 @@ export default defineConfig({
 			},
 			adapter: adapter()
 		})
-	]
+	],
+	server: {
+		proxy: {
+			'/api/auth': {
+				target: 'https://upbeat-axolotl-779.convex.site',
+				changeOrigin: true
+			}
+		}
+	}
 });
