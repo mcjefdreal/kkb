@@ -6,7 +6,7 @@
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
-	import type { Id } from '../../convex/_generated/dataModel.js';
+	import type { Id } from '../../../convex/_generated/dataModel.js';
 
 	const rooms = useQuery(api.queries.listMyRooms, () => ({}));
 	const deleteRoom = useMutation(api.rooms.deleteRoom);

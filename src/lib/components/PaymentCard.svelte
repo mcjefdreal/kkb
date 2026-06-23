@@ -19,8 +19,6 @@
 	const payee = profiles[payment.payeeUserId];
 	const hasGcash = !!payee?.gcashNumber;
 	const hasMaya = !!payee?.mayaNumber;
-
-
 </script>
 
 <div class="rounded-lg border border-slate-200 p-4">
