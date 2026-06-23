@@ -31,6 +31,7 @@ export interface Item {
 
 export interface ItemClaim {
 	_id: string;
+	roomId: string;
 	itemId: string;
 	userId: string;
 	shares: number;

@@ -1,1 +1,1 @@
-export { initConvexAuth } from './auth/client.svelte.js';
+export { initConvexAuth, useAuth } from './auth/client.svelte.js';

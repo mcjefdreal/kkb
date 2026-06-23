@@ -9,6 +9,7 @@
 	import ErrorBoundary from '$lib/components/ErrorBoundary.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { toasts } from '$lib/stores/toast.js';
+	import type { Id } from '../../../convex/_generated/dataModel.js';
 
 	let { data } = $props();
 	const auth = useAuth();
@@ -87,7 +88,7 @@
 
 	async function handleMarkPaid(paymentId: string, method: 'cash' | 'gcash' | 'maya') {
 		try {
-			await markPaid({ settlementId: paymentId as any, method });
+			await markPaid({ settlementId: paymentId as unknown as Id<'settlementPayments'>, method });
 		} catch (err) {
 			toasts.add(err instanceof Error ? err.message : 'Payment failed', 'error');
 		}
@@ -95,7 +96,7 @@
 
 	async function handleUnmark(paymentId: string) {
 		try {
-			await unmarkPaid({ settlementId: paymentId as any });
+			await unmarkPaid({ settlementId: paymentId as unknown as Id<'settlementPayments'> });
 		} catch (err) {
 			toasts.add(err instanceof Error ? err.message : 'Unmark failed', 'error');
 		}
@@ -103,7 +104,7 @@
 
 	async function handleConfirm(paymentId: string) {
 		try {
-			await confirmPayment({ settlementId: paymentId as any });
+			await confirmPayment({ settlementId: paymentId as unknown as Id<'settlementPayments'> });
 		} catch (err) {
 			toasts.add(err instanceof Error ? err.message : 'Confirm failed', 'error');
 		}

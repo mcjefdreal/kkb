@@ -1,8 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import { initConvexAuth } from '$lib/convex.js';
-	import { useAuth } from '$lib/auth/client.svelte.js';
+	import { initConvexAuth, useAuth } from '$lib/convex.js';
 	import { authClient } from '$lib/auth-client.js';
 	import Toasts from '$lib/components/Toasts.svelte';
 
