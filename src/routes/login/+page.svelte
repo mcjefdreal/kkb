@@ -17,8 +17,7 @@
 				toasts.add(friendlyError(result.error, 'Sign in failed'), 'error');
 			}
 		} catch (err) {
-			const message = friendlyError(err, 'Sign in failed');
-			toasts.add(message, 'error');
+			toasts.add(friendlyError(err, 'Sign in failed'), 'error');
 		} finally {
 			loading = false;
 		}
