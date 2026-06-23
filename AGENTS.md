@@ -103,13 +103,16 @@ site owner's existing Caddy reverse proxy.
 
 - `rooms.status` is `collecting | settling | settled`. `settled` is displayed as
   "All payments settled".
-- `settlementPayments.status` is `pending | pending_confirmation | paid`. Cash
-  goes straight to `paid`; e-wallets go `pending_confirmation` until the payee
-  confirms, then `paid`.
+- `settlementPayments.status` is `pending | pending_confirmation | paid`. Every
+  payment method — cash, GCash, Maya — goes to `pending_confirmation` when the
+  payer marks it sent, then to `paid` once the payee confirms receipt. The payer
+  can undo a `pending_confirmation` payment back to `pending`; the UI label for
+  this action is "Undo".
 - `checkAndSettleRoom(ctx, roomId)` in `convex/rooms.ts` is the single place
-  that flips a room to `settled` once every payment is `paid`. It is called from
-  both `markPaid` (cash path) and `confirmPayment`, which fixes the previous bug
-  where a cash-as-last-payment left the room stuck on `settling`.
+  that flips a room to `settled` once every payment is `paid`. It is called only
+  from `confirmPayment`.
+- `reopenRoom` only succeeds while no payments are `paid` or
+  `pending_confirmation`; any in-progress payment blocks reopening.
 - Status and method labels live in `src/lib/labels.ts` (`roomStatusLabel`,
   `paymentStatusLabel`, `paymentMethodLabel`) so UI wording doesn't drift.
 - Room deletion is creator-only (enforced server-side by `creatorMutation`):
