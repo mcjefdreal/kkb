@@ -4,6 +4,7 @@ services:
       context: .
       args:
         PUBLIC_CONVEX_URL: https://${DOMAIN}
+    container_name: kkb
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -12,15 +13,21 @@ services:
       - ADDRESS_HEADER=x-forwarded-for
       - XFF_DEPTH=1
       - HOST=0.0.0.0
-      - PORT=3000
+      - PORT=3001
       - SHUTDOWN_TIMEOUT=30
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3001:3001"
+    networks:
+      - caddy-net
     extra_hosts:
       - "${DOMAIN}:host-gateway"
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3001/"]
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 5s
+
+networks:
+  caddy-net:
+    external: true
