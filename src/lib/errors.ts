@@ -49,6 +49,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 	'Only the payee can confirm this payment': 'Only the payee can confirm this payment',
 	'Payment must be pending confirmation': 'Payment must be pending confirmation',
 	'Cannot reopen: some payments are already paid': 'Cannot reopen: some payments are already paid',
+	'Cannot reopen: some payments are in progress': 'Cannot reopen: some payments are still in progress',
 
 	// Server: convex/claims.ts
 	// 'Item not found' and 'Room is not open for claims' are shared with deleteClaim.
