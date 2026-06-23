@@ -7,7 +7,7 @@ Bill-splitting web app built with SvelteKit, Convex Cloud, and BetterAuth.
 - Frontend: SvelteKit (Svelte 5 runes, TypeScript 6, Tailwind v4, Vite 8)
 - Backend: Convex Cloud with BetterAuth on Convex
 - Realtime: `convex-svelte` + `@convex-dev/better-auth`
-- Deploy: `@sveltejs/adapter-node` behind Caddy, packaged with Docker Compose
+- Deploy: `@sveltejs/adapter-node` app container behind your existing Caddy reverse proxy
 
 ## Local development
 
@@ -73,15 +73,30 @@ Copy `.env.production.example` to `.env` on the server:
 
 ```sh
 DOMAIN=kkb.example.com
-CONVEX_CLOUD_URL=https://<deployment>.convex.cloud
-CONVEX_SITE_URL=https://<deployment>.convex.site
 ```
 
-Rules:
+`DOMAIN` must be bare host only: no `https://`, no trailing slash.
 
-- `DOMAIN` is bare host only: no `https://`, no trailing slash.
-- `CONVEX_CLOUD_URL` and `CONVEX_SITE_URL` must include `https://` and have no trailing
-  slash.
+The Convex Cloud URLs go into the `Caddyfile` snippet (replace the placeholders
+there). They are not read by the compose file.
+
+### App container runtime env
+
+`docker-compose.yml` sets these from `DOMAIN`:
+
+```sh
+ORIGIN=https://${DOMAIN}
+PROTOCOL_HEADER=x-forwarded-proto
+ADDRESS_HEADER=x-forwarded-for
+XFF_DEPTH=1
+HOST=0.0.0.0
+PORT=3000
+SHUTDOWN_TIMEOUT=30
+```
+
+`XFF_DEPTH=1` is correct when Caddy is the only proxy the app sees. If your Caddy
+sits behind a CDN (Cloudflare, etc.), increase this to match the number of trusted
+proxy hops.
 
 ### Convex env vars (set via `npx convex env set` on the production deployment)
 
@@ -141,10 +156,23 @@ https://<your-domain>/api/auth/callback/google
 
 ### 5. Configure DNS
 
-Point `<your-domain>` to your server's public IP. Verify it resolves before starting
+Point `<your-domain>` to your server's public IP. Verify it resolves before reloading
 Caddy so the ACME HTTP-01 challenge can succeed.
 
-### 6. Start the app on the server
+### 6. Add the Caddy site block
+
+Merge the site block from `Caddyfile` into your existing Caddyfile, replace the three
+placeholders with your real domain and Convex Cloud URLs, and reload Caddy:
+
+```sh
+caddy reload
+```
+
+Make sure your host Caddy binds to `0.0.0.0:443` (or at least to an address reachable
+from the Docker bridge gateway, typically `172.17.0.1`). The app container resolves its
+own domain to `host-gateway` for server-side Convex calls.
+
+### 7. Start the app on the server
 
 Copy the repository to the server, fill `.env` from `.env.production.example`, then:
 
@@ -152,7 +180,8 @@ Copy the repository to the server, fill `.env` from `.env.production.example`, t
 docker compose up -d --build
 ```
 
-This starts Caddy (TLS + reverse proxy) and the SvelteKit Node app.
+This starts the SvelteKit Node app container listening on `127.0.0.1:3000`. Only your
+host Caddy can reach it.
 
 ### Reverse proxy path precedence
 
@@ -160,10 +189,10 @@ Caddy routes by path in this exact order:
 
 | Path | Upstream | Purpose |
 |---|---|---|
-| `/api/auth/*` | `{$CONVEX_SITE_URL}` | BetterAuth routes + token endpoint + Google callback |
-| `/api/bot/*` | `{$CONVEX_SITE_URL}` | Bot HTTP actions |
-| `/api`, `/api/*` (WS) | `{$CONVEX_CLOUD_URL}` | Convex queries/mutations + live-query WebSocket |
-| `*` | `app:3000` | SvelteKit SSR + assets |
+| `/api/auth/*` | `https://<deployment>.convex.site` | BetterAuth routes + token endpoint + Google callback |
+| `/api/bot/*` | `https://<deployment>.convex.site` | Bot HTTP actions |
+| `/api`, `/api/*` (WS) | `https://<deployment>.convex.cloud` | Convex queries/mutations + live-query WebSocket |
+| `*` | `localhost:3000` | SvelteKit SSR + assets |
 
 The bare `/api` path is the WebSocket handshake for Convex live queries; it must be
 matched alongside `/api/*`.
@@ -173,25 +202,16 @@ matched alongside `/api/*`.
 `src/lib/loaders/roomGuard.ts` calls Convex from the SvelteKit server using
 `PUBLIC_CONVEX_URL` (which is baked to `https://<your-domain>`). The app container uses
 `extra_hosts: ["${DOMAIN}:host-gateway"]` so these calls resolve to the Docker host and
-reach Caddy locally, avoiding hairpin/NAT issues.
+reach your host Caddy locally, avoiding public-DNS hairpin issues.
 
-### Using an existing Caddy instance
+### If your Caddy also runs in a Docker container
 
-If you already run Caddy on the host, copy the site block from `Caddyfile` into your
-existing Caddy config, change `reverse_proxy app:3000` to `reverse_proxy localhost:3000`,
-and run the app container alone:
+`reverse_proxy localhost:3000` in the snippet will not work because `localhost` is the
+Caddy container's loopback, not the host. Either:
 
-```sh
-docker compose up -d --build app
-```
-
-Or run it without Docker:
-
-```sh
-pnpm build
-PORT=3000 ORIGIN=https://<your-domain> ADDRESS_HEADER=x-forwarded-for XFF_DEPTH=1 \
-  PROTOCOL_HEADER=x-forwarded-proto SHUTDOWN_TIMEOUT=30 node build
-```
+1. Put the app container and Caddy container on the same Docker network and change the
+   snippet to `reverse_proxy app:3000`.
+2. Or run the app container with `network_mode: host` and keep `localhost:3000`.
 
 ### WebSocket origin check
 
@@ -215,7 +235,7 @@ Before calling the deploy done:
 4. `NODE_ENV=production node build` starts locally without errors.
 5. `docker compose config` exits cleanly.
 6. DNS for `<your-domain>` resolves to the server's public IP.
-7. After `docker compose up -d --build`:
+7. After `docker compose up -d --build` and `caddy reload`:
    - `curl https://<your-domain>/api/bot/health` returns `{ ok: true }`.
    - Login with Google works and the session cookie has `Secure` and `SameSite=Lax`.
    - Opening a room shows live updates (WebSocket) without 403 errors.
