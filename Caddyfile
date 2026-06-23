@@ -1,17 +1,34 @@
-{$DOMAIN} {
+# Merge this site block into your existing Caddyfile and replace the three
+# placeholders below with your real values. Then reload Caddy:
+#
+#   caddy reload
+#
+# Placeholders:
+#   kkb.example.com              -> your public domain
+#   your-deployment.convex.site  -> your Convex Cloud site URL (HTTP actions)
+#   your-deployment.convex.cloud -> your Convex Cloud cloud URL (queries/WS)
+#
+# This snippet assumes Caddy runs directly on the host so it can reach the app
+# container at localhost:3000 (see docker-compose.yml). If Caddy itself runs in a
+# Docker container, use a shared Docker network and reverse_proxy app:3000, or run
+# the app container with network_mode: host.
+
+kkb.example.com {
 	encode zstd gzip
 	log
 
+	# Keep this entire route block inside the site block. The directives run in
+	# the order shown; /api/auth and /api/bot must match before the bare /api.
 	route {
 		@auth path /api/auth /api/auth/*
-		reverse_proxy @auth {$CONVEX_SITE_URL}
+		reverse_proxy @auth https://your-deployment.convex.site
 
 		@bot path /api/bot /api/bot/*
-		reverse_proxy @bot {$CONVEX_SITE_URL}
+		reverse_proxy @bot https://your-deployment.convex.site
 
 		@convex path /api /api/*
-		reverse_proxy @convex {$CONVEX_CLOUD_URL}
+		reverse_proxy @convex https://your-deployment.convex.cloud
 
-		reverse_proxy app:3000
+		reverse_proxy localhost:3000
 	}
 }
