@@ -19,7 +19,29 @@ export default defineConfig({
 		proxy: {
 			'/api/auth': {
 				target: 'https://upbeat-axolotl-779.convex.site',
-				changeOrigin: true
+				changeOrigin: true,
+				configure: (proxy) => {
+					proxy.on('proxyReq', (proxyReq) => {
+						proxyReq.setHeader('x-forwarded-host', 'localhost:5173');
+						proxyReq.setHeader('x-forwarded-proto', 'http');
+					});
+					proxy.on('proxyRes', (proxyRes) => {
+						const setCookie = proxyRes.headers['set-cookie'];
+						if (setCookie) {
+							proxyRes.headers['set-cookie'] = setCookie.map((c) => {
+								let cookie = c
+									.replace(/Domain=[^;,\s]+/gi, 'Domain=localhost')
+									.replace(/;\s*Secure/gi, '')
+									.replace(/SameSite=[^;,\s]+/gi, 'SameSite=Lax')
+									.replace(/Path=[^;,\s]+/gi, 'Path=/');
+								if (!/Path=/i.test(cookie)) {
+									cookie += '; Path=/';
+								}
+								return cookie;
+							});
+						}
+					});
+				}
 			},
 			'/api/bot': {
 				target: 'https://upbeat-axolotl-779.convex.site',
