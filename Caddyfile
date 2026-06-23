@@ -1,15 +1,16 @@
 {$DOMAIN} {
 	encode zstd gzip
+	log
 
 	route {
-		@api path /api/auth /api/auth/*
-		reverse_proxy @api convex-backend:3211
+		@auth path /api/auth /api/auth/*
+		reverse_proxy @auth {$CONVEX_SITE_URL}
 
 		@bot path /api/bot /api/bot/*
-		reverse_proxy @bot convex-backend:3211
+		reverse_proxy @bot {$CONVEX_SITE_URL}
 
 		@convex path /api /api/*
-		reverse_proxy @convex convex-backend:3210
+		reverse_proxy @convex {$CONVEX_CLOUD_URL}
 
 		reverse_proxy app:3000
 	}
