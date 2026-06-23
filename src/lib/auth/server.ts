@@ -2,15 +2,24 @@ import { ConvexHttpClient } from 'convex/browser';
 import { PUBLIC_CONVEX_URL } from '$env/static/public';
 
 const SESSION_COOKIE = 'better-auth.session_token';
+const JWT_COOKIE = 'better-auth.convex_jwt';
 
-export function getSessionToken(cookies: { get(name: string): string | undefined }): string | undefined {
+export function getSessionToken(cookies: {
+	get(name: string): string | undefined;
+}): string | undefined {
 	return cookies.get(SESSION_COOKIE);
 }
 
-export function createAuthedHttpClient(token?: string): ConvexHttpClient {
+export function getJwtToken(cookies: {
+	get(name: string): string | undefined;
+}): string | undefined {
+	return cookies.get(JWT_COOKIE);
+}
+
+export function createAuthedHttpClient(jwt?: string): ConvexHttpClient {
 	const client = new ConvexHttpClient(PUBLIC_CONVEX_URL);
-	if (token) {
-		client.setAuth(token);
+	if (jwt) {
+		client.setAuth(jwt);
 	}
 	return client;
 }
