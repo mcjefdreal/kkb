@@ -1,7 +1,8 @@
 # AGENTS.md
 
 SvelteKit minimal app (Svelte 5, TypeScript, Tailwind v4, Vite). Scaffolded
-with `sv create`; no tests, no CI, no deploy target configured yet.
+with `sv create`; no tests, no CI. Deployment target is Convex Cloud behind the
+site owner's existing Caddy reverse proxy.
 
 ## Commands
 
@@ -36,23 +37,25 @@ with `sv create`; no tests, no CI, no deploy target configured yet.
 - **`.npmrc` has `engine-strict=true`.** `package.json` already has an `engines`
   field (node>=20, pnpm>=9); keep it in sync.
 - **Adapter is `@sveltejs/adapter-node`.** The build output is a standalone Node
-  server. See `docker-compose.yml` for the Caddy + Docker Compose production
-  setup.
+  server. See `docker-compose.yml` for the app container setup and `Caddyfile`
+  for the snippet to merge into your host Caddy.
 
 ## Deployment
 
-- **Target: Convex Cloud + Caddy + Docker Compose.** The app is built with
-  `@sveltejs/adapter-node` and served behind Caddy on a single public domain.
-  Caddy proxies `/api/auth/*` and `/api/bot/*` to the Convex site origin,
-  `/api` and `/api/*` (including the WebSocket handshake) to the Convex cloud
-  origin, and everything else to the SvelteKit Node app.
+- **Target: Convex Cloud + your existing host Caddy + Docker Compose (app
+  container only).** The app is built with `@sveltejs/adapter-node` and served
+  behind your existing Caddy on a single public domain. Caddy proxies
+  `/api/auth/*` and `/api/bot/*` to the Convex site origin, `/api` and `/api/*`
+  (including the WebSocket handshake) to the Convex cloud origin, and
+  everything else to the SvelteKit Node app at `localhost:3000`. The
+  `Caddyfile` in this repo is a snippet to merge into your existing Caddyfile.
 - **`PUBLIC_CONVEX_URL` is build-time.** SvelteKit inlines `$env/static/public`
   during `vite build`. The Dockerfile accepts `PUBLIC_CONVEX_URL` as a build
   argument (derived from `DOMAIN` in `docker-compose.yml`) and writes it to
   `.env.production` before building. Changing domains requires a rebuild.
 - **Three distinct env surfaces:**
-  - Server `.env` (from `.env.production.example`): `DOMAIN`,
-    `CONVEX_CLOUD_URL`, `CONVEX_SITE_URL`.
+  - Server `.env` (from `.env.production.example`): `DOMAIN`. The Convex Cloud
+    URLs are pasted directly into the `Caddyfile` snippet.
   - Convex Cloud backend env (set via `npx convex env set` on the production
     deployment): `SITE_URL`, `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`,
     `GOOGLE_CLIENT_SECRET`, `BOT_API_KEY`.
@@ -66,7 +69,10 @@ with `sv create`; no tests, no CI, no deploy target configured yet.
   calls `https://<DOMAIN>/api/*` from inside the app container. The compose file
   adds `extra_hosts: ["${DOMAIN}:host-gateway"]` so the container resolves the
   domain to the Docker host and reaches Caddy locally, avoiding public-DNS
-  hairpin issues.
+  hairpin issues. Ensure the host Caddy binds to `0.0.0.0:443` (or to an address
+  reachable from the Docker bridge gateway, typically `172.17.0.1`). If Caddy
+  itself runs in a Docker container, use a shared Docker network with
+  `reverse_proxy app:3000`, or run the app with `network_mode: host`.
 - **Google OAuth redirect URI:** must exactly match
   `https://<DOMAIN>/api/auth/callback/google` in the production Google OAuth
   client.
@@ -140,7 +146,8 @@ Before a production deploy is considered done:
    ran before the first `npx convex deploy`.
 5. The Google OAuth redirect URI `https://<DOMAIN>/api/auth/callback/google` is
    configured.
-6. After `docker compose up -d --build`:
+6. After merging the `Caddyfile` snippet, running `caddy reload`, and starting the
+   app with `docker compose up -d --build`:
    - `curl https://<DOMAIN>/api/bot/health` returns `{ ok: true }`.
    - Google login succeeds and the session cookie is `Secure` + `SameSite=Lax`.
    - Live queries (WebSocket) work without 403 errors.
