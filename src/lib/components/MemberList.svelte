@@ -63,6 +63,7 @@
 						{member.role === 'member' ? 'Make contributor' : 'Demote to member'}
 					</button>
 					<HelpButton
+						id="role-{member.userId}"
 						label="Help about member roles"
 						text="Contributors can set their own contribution amount. Members can only claim items."
 					/>

@@ -2,12 +2,13 @@
 	interface Props {
 		label: string;
 		text: string;
+		id?: string;
 	}
 
-	let { label, text }: Props = $props();
+	let { label, text, id }: Props = $props();
 
 	let open = $state(false);
-	const tooltipId = `tooltip-${crypto.randomUUID()}`;
+	const tooltipId = `tooltip-${id ?? label.toLowerCase().replace(/\s+/g, '-')}`;
 
 	function openTooltip() {
 		open = true;
@@ -41,7 +42,7 @@
 		id={tooltipId}
 		role="tooltip"
 		aria-hidden={!open}
-		class="pointer-events-none absolute bottom-full left-1/2 mb-1 w-48 -translate-x-1/2 rounded bg-slate-800 px-2 py-1 text-center text-xs text-white shadow-lg transition-opacity {open
+		class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 w-max max-w-xs -translate-x-1/2 rounded bg-slate-800 px-2 py-1 text-center text-xs text-white shadow-lg transition-opacity {open
 			? 'opacity-100'
 			: 'opacity-0'}"
 	>

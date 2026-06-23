@@ -31,6 +31,7 @@
 			<p class="flex items-center gap-1 text-xs text-slate-500">
 				{paymentStatusLabel[payment.status]}
 				<HelpButton
+					id="payment-status-{payment._id}"
 					label="Help about payment status"
 					text="The payer picks a method and marks it sent. The payee then confirms receipt. Cash and e-wallets both require payee confirmation."
 				/>
@@ -75,6 +76,7 @@
 			{:else if payment.status === 'pending_confirmation'}
 				<div class="mt-2 flex items-center justify-end gap-2">
 					<HelpButton
+						id="payment-actions-{payment._id}"
 						label="Help about undo and confirm"
 						text="Payer: Undo reverts the payment to pending. Payee: Confirm marks the payment as received."
 					/>

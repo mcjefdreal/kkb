@@ -25,18 +25,20 @@
 			error = err instanceof Error ? err.message : 'Invalid amount';
 		}
 	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			submit();
+		}
+	}
 </script>
 
 <div class="flex items-center gap-2">
 	<input
 		bind:value
 		onblur={submit}
-		onkeydown={(e) => {
-			if (e.key === 'Enter') {
-				e.preventDefault();
-				submit();
-			}
-		}}
+		onkeydown={handleKeydown}
 		placeholder="0.00"
 		class="w-28 rounded-lg border border-slate-300 px-2 py-1 text-sm"
 	/>

@@ -47,6 +47,7 @@
 				<div class="flex items-center gap-2">
 					<span class="text-sm">{claimed}/{item.qty} claimed</span>
 					<HelpButton
+						id="claim-{item._id}"
 						label="Help about claiming items"
 						text="Enter how many of this item you'll cover. Unallocated shares are split by contributions."
 					/>
