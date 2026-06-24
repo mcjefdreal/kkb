@@ -4,6 +4,7 @@
 	import { useAuth } from '$lib/auth/client.svelte.js';
 	import { api } from '$lib/convex-api.js';
 	import { roomStatusLabel } from '$lib/labels.js';
+	import { formatPHP } from '$lib/money.js';
 	import { friendlyError } from '$lib/errors.js';
 	import ItemClaimGrid from '$lib/components/ItemClaimGrid.svelte';
 	import AddItemForm from '$lib/components/AddItemForm.svelte';
@@ -52,6 +53,27 @@
 				const p = roomState.data!.profiles[userId];
 				return !p?.gcashNumber && !p?.mayaNumber;
 			});
+		})()
+	);
+
+	const lockReady = $derived(
+		preview.data
+			? preview.data.unclaimedItems.length === 0 && preview.data.fundingGap <= 0
+			: false
+	);
+
+	const lockTooltipText = $derived(
+		(() => {
+			if (!preview.data) return '';
+			const reasons: string[] = [];
+			if (preview.data.unclaimedItems.length > 0) {
+				const names = preview.data.unclaimedItems.map((i) => i.name).join(', ');
+				reasons.push(`Claim all items: ${names}`);
+			}
+			if (preview.data.fundingGap > 0) {
+				reasons.push(`Add ${formatPHP(preview.data.fundingGap)} more in contributions`);
+			}
+			return reasons.join('. ');
 		})()
 	);
 
@@ -170,12 +192,23 @@
 							</p>
 						{/if}
 						<div class="flex items-center justify-end gap-2">
-							<button
-								onclick={handleFinalize}
-								class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
-							>
-								Lock & settle
-							</button>
+							<div class="relative inline-flex">
+								<button
+									onclick={handleFinalize}
+									disabled={!lockReady}
+									class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-slate-900"
+								>
+									Lock & settle
+								</button>
+								{#if !lockReady && lockTooltipText}
+									<span
+										role="tooltip"
+										class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 w-max max-w-xs -translate-x-1/2 rounded bg-slate-800 px-2 py-1 text-center text-xs text-white shadow-lg"
+									>
+										{lockTooltipText}
+									</span>
+								{/if}
+							</div>
 							<HelpButton
 								label="Help about locking the room"
 								text="Locks the room, computes who owes whom, and starts payments. You can only reopen while no payments are in progress."
