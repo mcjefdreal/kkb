@@ -11,6 +11,7 @@
 import type * as authz from "../authz.js";
 import type * as claims from "../claims.js";
 import type * as http from "../http.js";
+import type * as items from "../items.js";
 import type * as profiles from "../profiles.js";
 import type * as queries from "../queries.js";
 import type * as rooms from "../rooms.js";
@@ -26,6 +27,7 @@ declare const fullApi: ApiFromModules<{
   authz: typeof authz;
   claims: typeof claims;
   http: typeof http;
+  items: typeof items;
   profiles: typeof profiles;
   queries: typeof queries;
   rooms: typeof rooms;

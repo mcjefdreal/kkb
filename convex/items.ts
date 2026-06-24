@@ -1,5 +1,6 @@
 import { v } from 'convex/values';
 import { mutation } from './_generated/server.js';
+import type { Id } from './_generated/dataModel.js';
 import { creatorMutation } from './authz.js';
 
 export const addItem = mutation({
@@ -9,7 +10,10 @@ export const addItem = mutation({
 		priceCentavos: v.number(),
 		qty: v.number()
 	},
-	handler: creatorMutation(async (ctx, { roomId, name, priceCentavos, qty }) => {
+  handler: creatorMutation<
+    { roomId: Id<'rooms'>; name: string; priceCentavos: number; qty: number },
+      void
+  >(async (ctx, { roomId, name, priceCentavos, qty }) => {
 		const room = await ctx.db.get(roomId);
 		if (!room || room.status !== 'collecting') {
 			throw new Error('Room is not open for adding items');
