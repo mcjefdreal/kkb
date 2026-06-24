@@ -77,6 +77,8 @@
 		})()
 	);
 
+	let hovering = $state(false);
+
 	async function handleSetClaim(itemId: string, shares: number) {
 		try {
 			await setClaim({ itemId, shares });
@@ -192,7 +194,11 @@
 							</p>
 						{/if}
 						<div class="flex items-center justify-end gap-2">
-							<div class="relative inline-flex">
+							<div
+								class="relative inline-flex"
+								onmouseenter={() => (hovering = true)}
+								onmouseleave={() => (hovering = false)}
+							>
 								<button
 									onclick={handleFinalize}
 									disabled={!lockReady}
@@ -200,7 +206,7 @@
 								>
 									Lock & settle
 								</button>
-								{#if !lockReady && lockTooltipText}
+								{#if hovering && !lockReady && lockTooltipText}
 									<span
 										role="tooltip"
 										class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 w-max max-w-xs -translate-x-1/2 rounded bg-slate-800 px-2 py-1 text-center text-xs text-white shadow-lg"
