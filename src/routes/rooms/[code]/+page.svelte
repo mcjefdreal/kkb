@@ -26,6 +26,7 @@
 	const setContribution = useMutation(api.rooms.setContribution);
 	const setRole = useMutation(api.rooms.setMemberRole);
 	const finalize = useMutation(api.rooms.finalizeSettlement);
+	const editItem = useMutation(api.items.editItem);
 	const markPaid = useMutation(api.rooms.markPaid);
 	const unmarkPaid = useMutation(api.rooms.unmarkPaid);
 	const confirmPayment = useMutation(api.rooms.confirmPayment);
@@ -111,6 +112,21 @@
 		}
 	}
 
+	async function handleEditItem(itemId: string, name: string, priceCentavos: number, qty: number) {
+		try {
+			await editItem({
+				roomId: data.roomId,
+				itemId: itemId as unknown as Id<'items'>,
+				name,
+				priceCentavos,
+				qty
+			});
+			toasts.add('Item updated', 'success');
+		} catch (err) {
+			toasts.add(friendlyError(err, 'Failed to edit item'), 'error');
+		}
+	}
+
 	async function handleDeleteRoom() {
 		if (!confirm('Delete this room permanently?')) return;
 		try {
@@ -187,7 +203,9 @@
 					profiles={state.profiles}
 					{currentUserId}
 					{editable}
+					{isCreator}
 					onSetClaim={handleSetClaim}
+					onSaveItem={handleEditItem}
 				/>
 				{#if isCreator && editable}
 					<div class="mt-3">
