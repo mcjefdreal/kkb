@@ -31,9 +31,7 @@
 	const deleteRoom = useMutation(api.rooms.deleteRoom);
 
 	const currentUserId = $derived(auth.user?.id ?? '');
-	const isCreator = $derived(
-		!!roomState.data && roomState.data.room.createdBy === currentUserId
-	);
+	const isCreator = $derived(!!roomState.data && roomState.data.room.createdBy === currentUserId);
 	const editable = $derived(roomState.data?.room.status === 'collecting');
 	const paymentProgress = $derived(
 		roomState.data
@@ -131,104 +129,104 @@
 	<ErrorBoundary error={roomState.error}>
 		<div class="space-y-6">
 			<div class="flex items-start justify-between">
-			<div>
-				<h1 class="text-2xl font-bold">{state.room.name}</h1>
-				<p class="font-mono text-sm text-slate-500">Code: {data.code}</p>
-				<p class="flex items-center gap-1 text-xs uppercase text-slate-400">
-					{roomStatusLabel[state.room.status]}
-					<HelpButton
-						label="Help about room status"
-						text="Collecting = adding items and contributions. Settling = payments in progress. Settled = all payments confirmed."
-					/>
-				</p>
-				{#if paymentProgress.total > 0}
-					<p class="text-xs text-slate-500">
-						Payments: {paymentProgress.paid}/{paymentProgress.total} paid
+				<div>
+					<h1 class="text-2xl font-bold">{state.room.name}</h1>
+					<p class="font-mono text-sm text-slate-500">Code: {data.code}</p>
+					<p class="flex items-center gap-1 text-xs uppercase text-slate-400">
+						{roomStatusLabel[state.room.status]}
+						<HelpButton
+							label="Help about room status"
+							text="Collecting = adding items and contributions. Settling = payments in progress. Settled = all payments confirmed."
+						/>
 					</p>
-				{/if}
-			</div>
-			{#if isCreator && editable}
-				<div class="text-right">
-					{#if creditorsWithoutWallet.length > 0}
-						<p class="mb-1 text-xs text-amber-700">
-							Warning: creditors without e-wallet may only be paid cash.
+					{#if paymentProgress.total > 0}
+						<p class="text-xs text-slate-500">
+							Payments: {paymentProgress.paid}/{paymentProgress.total} paid
 						</p>
 					{/if}
-					<div class="flex items-center justify-end gap-2">
-						<button
-							onclick={handleFinalize}
-							class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
-						>
-							Lock & settle
-						</button>
-						<HelpButton
-							label="Help about locking the room"
-							text="Locks the room, computes who owes whom, and starts payments. You can only reopen while no payments are in progress."
-						/>
+				</div>
+				{#if isCreator && editable}
+					<div class="text-right">
+						{#if creditorsWithoutWallet.length > 0}
+							<p class="mb-1 text-xs text-amber-700">
+								Warning: creditors without e-wallet may only be paid cash.
+							</p>
+						{/if}
+						<div class="flex items-center justify-end gap-2">
+							<button
+								onclick={handleFinalize}
+								class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800"
+							>
+								Lock & settle
+							</button>
+							<HelpButton
+								label="Help about locking the room"
+								text="Locks the room, computes who owes whom, and starts payments. You can only reopen while no payments are in progress."
+							/>
+						</div>
 					</div>
-				</div>
-			{/if}
-			{#if isCreator && state.room.status === 'settled'}
-				<div class="text-right">
-					<button
-						onclick={handleDeleteRoom}
-						class="rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
-					>
-						Delete room
-					</button>
-				</div>
-			{/if}
-		</div>
+				{/if}
+				{#if isCreator && state.room.status === 'settled'}
+					<div class="text-right">
+						<button
+							onclick={handleDeleteRoom}
+							class="rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+						>
+							Delete room
+						</button>
+					</div>
+				{/if}
+			</div>
 
-		<section>
-			<h2 class="mb-2 font-semibold">Items</h2>
-			<ItemClaimGrid
-				items={state.items}
-				claims={state.claims}
-				profiles={state.profiles}
-				currentUserId={currentUserId}
-				editable={editable}
-				onSetClaim={handleSetClaim}
-			/>
-		</section>
-
-		<section>
-			<h2 class="mb-2 font-semibold">Members</h2>
-			<MemberList
-				members={state.members}
-				contributions={state.contributions}
-				profiles={state.profiles}
-				currentUserId={currentUserId}
-				isCreator={isCreator}
-				onSetRole={handleSetRole}
-				onSetContribution={handleSetContribution}
-			/>
-		</section>
-
-		{#if preview.data}
-			<SettlementPreview
-				transactions={preview.data.transactions}
-				change={preview.data.change}
-				unclaimedItems={preview.data.unclaimedItems}
-				fundingGap={preview.data.fundingGap}
-				profiles={state.profiles}
-				status={state.room.status}
-			/>
-		{/if}
-
-		{#if state.settlements.length > 0}
 			<section>
-				<h2 class="mb-2 font-semibold">Payments</h2>
-				<SettlementList
-					payments={state.settlements}
+				<h2 class="mb-2 font-semibold">Items</h2>
+				<ItemClaimGrid
+					items={state.items}
+					claims={state.claims}
 					profiles={state.profiles}
-					currentUserId={currentUserId}
-					onMarkPaid={handleMarkPaid}
-					onUnmark={handleUnmark}
-					onConfirm={handleConfirm}
+					{currentUserId}
+					{editable}
+					onSetClaim={handleSetClaim}
 				/>
 			</section>
-		{/if}
+
+			<section>
+				<h2 class="mb-2 font-semibold">Members</h2>
+				<MemberList
+					members={state.members}
+					contributions={state.contributions}
+					profiles={state.profiles}
+					{currentUserId}
+					{isCreator}
+					onSetRole={handleSetRole}
+					onSetContribution={handleSetContribution}
+				/>
+			</section>
+
+			{#if preview.data}
+				<SettlementPreview
+					transactions={preview.data.transactions}
+					change={preview.data.change}
+					unclaimedItems={preview.data.unclaimedItems}
+					fundingGap={preview.data.fundingGap}
+					profiles={state.profiles}
+					status={state.room.status}
+				/>
+			{/if}
+
+			{#if state.settlements.length > 0}
+				<section>
+					<h2 class="mb-2 font-semibold">Payments</h2>
+					<SettlementList
+						payments={state.settlements}
+						profiles={state.profiles}
+						{currentUserId}
+						onMarkPaid={handleMarkPaid}
+						onUnmark={handleUnmark}
+						onConfirm={handleConfirm}
+					/>
+				</section>
+			{/if}
 		</div>
 	</ErrorBoundary>
 {/if}

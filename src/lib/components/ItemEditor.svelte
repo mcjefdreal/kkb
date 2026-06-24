@@ -22,9 +22,7 @@
 		error?: string;
 	}
 
-	let rows = $state<Row[]>([
-		{ id: crypto.randomUUID(), name: '', price: '', qty: 1 }
-	]);
+	let rows = $state<Row[]>([{ id: crypto.randomUUID(), name: '', price: '', qty: 1 }]);
 
 	function notify() {
 		const items: ItemInput[] = [];
