@@ -13,19 +13,13 @@
 
 	let name = $state('');
 	let items = $state<ItemInput[]>([]);
-	let ownContribution = $state('');
+	let ownContribution = $state('0.00');
 	let loading = $state(false);
 	let createError = $state<string | null>(null);
 
 	const totalCentavos = $derived(
 		items.reduce((sum, item) => sum + item.priceCentavos * item.qty, 0)
 	);
-
-	$effect(() => {
-		if (ownContribution === '') {
-			ownContribution = (totalCentavos / 100).toFixed(2);
-		}
-	});
 
 	async function submit(e: Event) {
 		e.preventDefault();
@@ -68,40 +62,42 @@
 	<form onsubmit={submit} class="space-y-6">
 		<div>
 			<label class="block text-sm font-medium" for="name">Room name</label>
-		<input
-			id="name"
-			bind:value={name}
-			required
-			class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-		/>
-	</div>
+			<input
+				id="name"
+				bind:value={name}
+				required
+				class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+			/>
+		</div>
 
-	<div>
-		<label class="block text-sm font-medium">Items</label>
-		<ItemEditor onItemsChange={(next) => (items = next)} />
-	</div>
+		<div>
+			<label class="block text-sm font-medium">Items</label>
+			<ItemEditor onItemsChange={(next) => (items = next)} />
+		</div>
 
-	<div>
-		<label class="block text-sm font-medium" for="own">Your contribution</label>
-		<input
-			id="own"
-			bind:value={ownContribution}
-			placeholder="0.00"
-			class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-		/>
-		<p class="mt-1 text-xs text-slate-500">Total: {formatPHP(totalCentavos)} — you can contribute more; the extra returns to you as change.</p>
-	</div>
+		<div>
+			<label class="block text-sm font-medium" for="own">Your contribution</label>
+			<input
+				id="own"
+				bind:value={ownContribution}
+				placeholder="0.00"
+				class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+			/>
+			<p class="mt-1 text-xs text-slate-500">
+				Total: {formatPHP(totalCentavos)} — you can contribute more; the extra returns to you as change.
+			</p>
+		</div>
 
-	<button
-		type="submit"
-		disabled={loading}
-		class="rounded-lg bg-slate-900 px-4 py-2 text-white hover:bg-slate-800 disabled:opacity-50"
-	>
-		{#if loading}
-			<Spinner size={18} />
-		{:else}
-			Create room
-		{/if}
-	</button>
+		<button
+			type="submit"
+			disabled={loading}
+			class="rounded-lg bg-slate-900 px-4 py-2 text-white hover:bg-slate-800 disabled:opacity-50"
+		>
+			{#if loading}
+				<Spinner size={18} />
+			{:else}
+				Create room
+			{/if}
+		</button>
 	</form>
 </ErrorBoundary>
