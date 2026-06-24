@@ -30,7 +30,7 @@
 			<ol class="mb-5 list-inside list-decimal space-y-2 text-sm text-slate-600">
 				<li>Get the 8‑character code from the creator</li>
 				<li>Enter it on the Join page</li>
-				<li>Add your contribution to the room</li>
+				<li>Select your items</li>
 			</ol>
 			<a
 				href={ctaJoin}
