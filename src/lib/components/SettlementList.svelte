@@ -4,7 +4,7 @@
 
 	interface Props {
 		payments: SettlementPayment[];
-		profiles: Record<string, Pick<Profile, 'displayName'>>;
+		profiles: Record<string, Pick<Profile, 'displayName' | 'gcashNumber' | 'mayaNumber'>>;
 		currentUserId: string;
 		onMarkPaid: (paymentId: string, method: 'cash' | 'gcash' | 'maya') => void;
 		onUnmark: (paymentId: string) => void;

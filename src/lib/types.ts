@@ -63,6 +63,8 @@ export interface Profile {
 	_id: string;
 	userId: string;
 	displayName: string;
+	gcashNumber?: string;
+	mayaNumber?: string;
 	createdAt: number;
 }
 
@@ -73,5 +75,5 @@ export interface RoomState {
 	claims: ItemClaim[];
 	contributions: Contribution[];
 	settlements: SettlementPayment[];
-	profiles: Record<string, Pick<Profile, 'displayName'>>;
+	profiles: Record<string, Pick<Profile, 'displayName' | 'gcashNumber' | 'mayaNumber'>>;
 }

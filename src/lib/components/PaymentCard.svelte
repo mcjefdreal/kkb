@@ -6,7 +6,7 @@
 
 	interface Props {
 		payment: SettlementPayment;
-		profiles: Record<string, Pick<Profile, 'displayName'>>;
+		profiles: Record<string, Pick<Profile, 'displayName' | 'gcashNumber' | 'mayaNumber'>>;
 		currentUserId: string;
 		onMarkPaid: (method: 'cash' | 'gcash' | 'maya') => void;
 		onUnmark: () => void;
@@ -89,6 +89,22 @@
 						</button>
 					{/if}
 				</div>
+				{#if payment.method === 'gcash' || payment.method === 'maya'}
+					{@const walletKey = payment.method === 'gcash' ? 'gcashNumber' : 'mayaNumber'}
+					{@const label = payment.method === 'gcash' ? 'GCash' : 'Maya'}
+					{#if isPayer}
+						{@const number = payee?.[walletKey]}
+						<p class="mt-1 text-xs text-slate-500">
+							{label} number of {payee?.displayName ?? 'Unknown'}: {number ?? 'unset'}
+						</p>
+					{:else if isPayee}
+						{@const payer = profiles[payment.payerUserId]}
+						{@const number = payer?.[walletKey]}
+						<p class="mt-1 text-xs text-slate-500">
+							{label} number of {payer?.displayName ?? 'Unknown'}: {number ?? 'unset'}
+						</p>
+					{/if}
+				{/if}
 			{/if}
 		</div>
 	</div>
