@@ -6,6 +6,7 @@
 	import { roomStatusLabel } from '$lib/labels.js';
 	import { friendlyError } from '$lib/errors.js';
 	import ItemClaimGrid from '$lib/components/ItemClaimGrid.svelte';
+	import AddItemForm from '$lib/components/AddItemForm.svelte';
 	import MemberList from '$lib/components/MemberList.svelte';
 	import SettlementPreview from '$lib/components/SettlementPreview.svelte';
 	import SettlementList from '$lib/components/SettlementList.svelte';
@@ -188,6 +189,11 @@
 					{editable}
 					onSetClaim={handleSetClaim}
 				/>
+				{#if isCreator && editable}
+					<div class="mt-3">
+						<AddItemForm roomId={data.roomId} />
+					</div>
+				{/if}
 			</section>
 
 			<section>
