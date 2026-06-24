@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { useAuth } from '$lib/auth/client.svelte.js';
+	import QuickGuide from '$lib/components/QuickGuide.svelte';
 
 	const auth = useAuth();
 </script>
@@ -17,3 +18,5 @@
 		</a>
 	{/if}
 </div>
+
+<QuickGuide />
