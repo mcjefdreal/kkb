@@ -82,10 +82,6 @@ export function friendlyError(err: unknown, fallback: string): string {
 	if (message.startsWith('Item "') && message.endsWith('" is not fully claimed')) {
 		return 'An item hasn’t been fully claimed yet';
 	}
-	if (message.startsWith('Payee has not configured')) {
-		return 'That payee hasn’t set up that e-wallet number';
-	}
-
 	// Exact match.
 	if (message in ERROR_MESSAGES) {
 		return ERROR_MESSAGES[message];
