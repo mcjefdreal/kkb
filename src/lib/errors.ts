@@ -58,9 +58,12 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 	// Server: convex/items.ts
 	'Room is not open for adding items': 'Room is not open for adding items',
+	'Room is not open for editing items': 'Room is not open for editing items',
 	'Item name is required': 'Item name is required',
 	'Price must be greater than 0': 'Price must be greater than 0',
 	'Quantity must be greater than 0': 'Quantity must be greater than 0',
+	'Item not found in this room': 'Item not found',
+	'Quantity cannot be less than total claimed shares': 'Quantity cannot be less than total claimed shares',
 
 	// Server: convex/profiles.ts
 	'Display name is required': 'Display name is required',
