@@ -81,6 +81,12 @@
 	<Spinner />
 {:else}
 	{@const state = roomState.data}
+	<a
+		href="/rooms/{data.code}"
+		class="mb-1 inline-block text-sm text-slate-500 hover:text-slate-700"
+	>
+		← Back to room
+	</a>
 	<h1 class="mb-6 text-2xl font-bold">{state.room.name} settings</h1>
 
 	<section class="mb-8">

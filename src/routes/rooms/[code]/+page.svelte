@@ -46,9 +46,7 @@
 	);
 
 	const lockReady = $derived(
-		preview.data
-			? preview.data.unclaimedItems.length === 0 && preview.data.fundingGap <= 0
-			: false
+		preview.data ? preview.data.unclaimedItems.length === 0 && preview.data.fundingGap <= 0 : false
 	);
 
 	const lockTooltipText = $derived(
@@ -160,6 +158,12 @@
 		<div class="space-y-6">
 			<div class="flex items-start justify-between">
 				<div>
+					<a
+						href="/dashboard"
+						class="mb-1 text-sm text-slate-500 hover:text-slate-700"
+					>
+						← Back
+					</a>
 					<h1 class="text-2xl font-bold">{state.room.name}</h1>
 					<p class="font-mono text-sm text-slate-500">Code: {data.code}</p>
 					<p class="flex items-center gap-1 text-xs uppercase text-slate-400">
