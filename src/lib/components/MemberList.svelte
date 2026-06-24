@@ -10,7 +10,6 @@
 		profiles: Record<string, Pick<Profile, 'displayName' | 'gcashNumber' | 'mayaNumber'>>;
 		currentUserId: string;
 		isCreator: boolean;
-		totalCentavos: number;
 		onSetRole: (targetUserId: string, role: 'member' | 'contributor') => void;
 		onSetContribution: (amountCentavos: number) => void;
 	}
@@ -21,20 +20,12 @@
 		profiles,
 		currentUserId,
 		isCreator,
-		totalCentavos,
 		onSetRole,
 		onSetContribution
 	}: Props = $props();
 
 	function contributionFor(userId: string) {
 		return contributions.find((c) => c.userId === userId)?.amountCentavos ?? 0;
-	}
-
-	function maxFor(userId: string) {
-		const others = contributions
-			.filter((c) => c.userId !== userId)
-			.reduce((sum, c) => sum + c.amountCentavos, 0);
-		return totalCentavos - others;
 	}
 </script>
 
@@ -50,7 +41,6 @@
 				{#if member.userId === currentUserId && (member.role === 'contributor' || isCreator)}
 					<ContributionInput
 						amountCentavos={contributionFor(member.userId)}
-						maxCentavos={maxFor(member.userId)}
 						onChange={onSetContribution}
 					/>
 				{/if}

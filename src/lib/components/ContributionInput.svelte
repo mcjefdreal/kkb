@@ -4,11 +4,10 @@
 
 	interface Props {
 		amountCentavos: number;
-		maxCentavos: number;
 		onChange: (amountCentavos: number) => void;
 	}
 
-	let { amountCentavos, maxCentavos, onChange }: Props = $props();
+	let { amountCentavos, onChange }: Props = $props();
 
 	let value = $state(formatPHP(amountCentavos));
 	let error = $state<string | null>(null);
@@ -16,9 +15,6 @@
 	function submit() {
 		try {
 			const centavos = toCentavos(value);
-			if (centavos > maxCentavos) {
-				throw new Error(`Maximum allowed is ${formatPHP(maxCentavos)}`);
-			}
 			error = null;
 			onChange(centavos);
 		} catch (err) {
@@ -44,7 +40,7 @@
 	/>
 	<HelpButton
 		label="Help about contribution limit"
-		text={`Max you can contribute is ${formatPHP(maxCentavos)}.`}
+		text="You can contribute more than the total. Any extra is returned as change after settlement."
 	/>
 	{#if error}
 		<span class="text-xs text-red-600">{error}</span>

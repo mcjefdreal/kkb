@@ -22,9 +22,6 @@
 	const isCreator = $derived(
 		!!roomState.data && roomState.data.room.createdBy === currentUserId
 	);
-	const totalCentavos = $derived(
-		roomState.data?.items.reduce((sum, i) => sum + i.priceCentavos * i.qty, 0) ?? 0
-	);
 	const canReopen = $derived(
 		isCreator && roomState.data?.room.status === 'settling' &&
 		!roomState.data.settlements.some(
@@ -94,7 +91,6 @@
 			profiles={state.profiles}
 			currentUserId={currentUserId}
 			isCreator={isCreator}
-			totalCentavos={totalCentavos}
 			onSetRole={handleSetRole}
 			onSetContribution={handleSetContribution}
 		/>
