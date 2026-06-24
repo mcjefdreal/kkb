@@ -89,7 +89,7 @@
 			placeholder="0.00"
 			class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
 		/>
-		<p class="mt-1 text-xs text-slate-500">Total: {formatPHP(totalCentavos)}</p>
+		<p class="mt-1 text-xs text-slate-500">Total: {formatPHP(totalCentavos)} — you can contribute more; the extra returns to you as change.</p>
 	</div>
 
 	<button
