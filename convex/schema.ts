@@ -5,6 +5,8 @@ export default defineSchema({
 	profiles: defineTable({
 		userId: v.string(),
 		displayName: v.string(),
+		gcashNumber: v.optional(v.string()),
+		mayaNumber: v.optional(v.string()),
 		createdAt: v.number()
 	})
 		.index('userId', ['userId'])

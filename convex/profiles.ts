@@ -4,7 +4,9 @@ import { v } from 'convex/values';
 
 export const updateProfile = mutation({
 	args: {
-		displayName: v.string()
+		displayName: v.string(),
+		gcashNumber: v.optional(v.string()),
+		mayaNumber: v.optional(v.string())
 	},
 	handler: async (ctx, args) => {
 		const userId = await getUserId(ctx);
@@ -18,12 +20,16 @@ export const updateProfile = mutation({
 		}
 		if (existing) {
 			await ctx.db.patch(existing._id, {
-				displayName: trimmedName
+				displayName: trimmedName,
+				gcashNumber: args.gcashNumber,
+				mayaNumber: args.mayaNumber
 			});
 		} else {
 			await ctx.db.insert('profiles', {
 				userId,
 				displayName: trimmedName,
+				gcashNumber: args.gcashNumber,
+				mayaNumber: args.mayaNumber,
 				createdAt: Date.now()
 			});
 		}

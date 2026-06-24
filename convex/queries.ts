@@ -47,12 +47,14 @@ export const getRoomState = query({
 			.withIndex('roomId', (q) => q.eq('roomId', roomId))
 			.collect();
 		const userIds = new Set(members.map((m) => m.userId));
-		const profiles: Record<string, { displayName: string }> = {};
+		const profiles: Record<string, { displayName: string; gcashNumber?: string; mayaNumber?: string }> = {};
 		for (const userId of userIds) {
 			const profile = await ctx.db.query('profiles').withIndex('userId', (q) => q.eq('userId', userId)).unique();
 			if (profile) {
 				profiles[userId] = {
-					displayName: profile.displayName
+					displayName: profile.displayName,
+					gcashNumber: profile.gcashNumber,
+					mayaNumber: profile.mayaNumber
 				};
 			}
 		}
