@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { toCentavos, formatPHP } from '$lib/money.js';
+	import { toCentavos } from '$lib/money.js';
 	import HelpButton from './HelpButton.svelte';
 
 	interface Props {
@@ -9,7 +9,7 @@
 
 	let { amountCentavos, onChange }: Props = $props();
 
-	let value = $state(formatPHP(amountCentavos));
+	let value = $state(amountCentavos === 0 ? '' : (amountCentavos / 100).toFixed(2));
 	let error = $state<string | null>(null);
 
 	function submit() {
