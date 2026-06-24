@@ -96,21 +96,6 @@
 		/>
 	</section>
 
-	<section class="mb-8">
-		<h2 class="mb-2 font-semibold">E-wallets</h2>
-		<div class="space-y-2">
-			{#each state.members as member (member._id)}
-				{@const profile = state.profiles[member.userId]}
-				<div class="flex justify-between rounded-lg border border-slate-200 px-4 py-2 text-sm">
-					<span>{profile?.displayName ?? 'Unknown'}</span>
-					<span class="text-slate-500">
-						GCash: {profile?.gcashNumber ?? '—'} · Maya: {profile?.mayaNumber ?? '—'}
-					</span>
-				</div>
-			{/each}
-		</div>
-	</section>
-
 	<section class="space-y-3">
 		{#if canReopen}
 			<button

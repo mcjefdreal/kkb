@@ -45,17 +45,6 @@
 			: { paid: 0, total: 0 }
 	);
 
-	const creditorsWithoutWallet = $derived(
-		(() => {
-			if (!preview.data || !roomState.data) return [];
-			const payees = new Set(preview.data.transactions.map((t) => t.payeeUserId));
-			return Array.from(payees).filter((userId) => {
-				const p = roomState.data!.profiles[userId];
-				return !p?.gcashNumber && !p?.mayaNumber;
-			});
-		})()
-	);
-
 	const lockReady = $derived(
 		preview.data
 			? preview.data.unclaimedItems.length === 0 && preview.data.fundingGap <= 0
@@ -188,11 +177,6 @@
 				</div>
 				{#if isCreator && editable}
 					<div class="text-right">
-						{#if creditorsWithoutWallet.length > 0}
-							<p class="mb-1 text-xs text-amber-700">
-								Warning: creditors without e-wallet may only be paid cash.
-							</p>
-						{/if}
 						<div class="flex items-center justify-end gap-2">
 							<div
 								class="relative inline-flex"
