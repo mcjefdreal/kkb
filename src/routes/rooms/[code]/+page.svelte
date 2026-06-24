@@ -179,6 +179,16 @@
 						</p>
 					{/if}
 				</div>
+				{#if isCreator}
+					<div class="text-right">
+						<a
+							href="/rooms/{data.code}/settings"
+							class="mb-2 inline-block rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+						>
+							Room Settings
+						</a>
+					</div>
+				{/if}
 				{#if isCreator && editable}
 					<div class="text-right">
 						<div class="flex items-center justify-end gap-2">
@@ -208,16 +218,6 @@
 								text="Locks the room, computes who owes whom, and starts payments. You can only reopen while no payments are in progress."
 							/>
 						</div>
-					</div>
-				{/if}
-				{#if isCreator}
-					<div class="text-right">
-						<a
-							href="/rooms/{data.code}/settings"
-							class="inline-block rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-						>
-							Room Settings
-						</a>
 					</div>
 				{/if}
 				{#if isCreator && state.room.status === 'settled'}
