@@ -368,16 +368,6 @@ export const markPaid = mutation({
 		if (payment.method !== 'pending' && payment.method !== method) {
 			throw new Error('Payment method cannot be changed');
 		}
-		if (method === 'gcash' || method === 'maya') {
-			const profile = await ctx.db
-				.query('profiles')
-				.withIndex('userId', (q) => q.eq('userId', payment.payeeUserId))
-				.unique();
-			const number = method === 'gcash' ? profile?.gcashNumber : profile?.mayaNumber;
-			if (!number) {
-				throw new Error(`Payee has not configured ${method} number`);
-			}
-		}
 		const status = 'pending_confirmation';
 		await ctx.db.patch(settlementId, { method, status, reference });
 		await ctx.db.patch(payment.roomId, { lastActivity: Date.now() });
