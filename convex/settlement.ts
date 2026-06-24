@@ -61,21 +61,14 @@ export function computeSettlement(
 			continue;
 		}
 
-		const allocations: { userId: string; base: number; fraction: number }[] = [];
-		let allocated = 0;
 		for (const claim of itemClaims) {
-			const base = Math.floor((itemCost * claim.shares) / totalShares);
-			const fraction = (itemCost * claim.shares) / totalShares - base;
-			allocations.push({ userId: claim.userId, base, fraction });
-			allocated += base;
+			if (claim.shares > 0) {
+				owed[claim.userId] = (owed[claim.userId] ?? 0) + claim.shares * item.priceCentavos;
+			}
 		}
-		const remainder = itemCost - allocated;
-		allocations
-			.sort((a, b) => b.fraction - a.fraction)
-			.slice(0, remainder)
-			.forEach((a) => (a.base += 1));
-		for (const a of allocations) {
-			owed[a.userId] = (owed[a.userId] ?? 0) + a.base;
+
+		if (totalShares < item.qty) {
+			unclaimedItems.push({ ...item, qty: item.qty - totalShares });
 		}
 	}
 
