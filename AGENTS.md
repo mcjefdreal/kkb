@@ -120,6 +120,17 @@ site owner's existing Caddy reverse proxy.
   - room page: Delete button appears when `status === 'settled'`;
   - settings page: existing Delete button remains available to creators at any
     status.
+- **Contributions may exceed the bill total** (over-funding). The per-contributor
+  ₱1,000,000 hard cap still applies. Over-funded rooms finalize without error.
+  After settlement, `computeSettlement` returns a `change[]` list — each
+  creditor's residual amount after internal debtor→creditor payments. This
+  represents how much over-contributed cash should be returned from the pool
+  (display-only; not a settlementPayment). `applyResidueToLargestCreditor` was
+  removed; the over-funded residual is now surfaced per-creditor as `change`.
+- **`finalizeSettlement`** accepts `totalContributed >= totalCost` (blocks
+  under-funding only). If no debtor→creditor transactions are needed (e.g. all
+  members contributed ≥ their owed share), the room is set directly to
+  `'settled'` instead of `'settling'`, fixing a pre-existing stuck-room bug.
 
 ## Error handling
 
