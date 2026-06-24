@@ -1,7 +1,7 @@
 import { action, mutation, type MutationCtx, type QueryCtx } from './_generated/server.js';
 import { api } from './_generated/api.js';
 import { creatorMutation, requireContributor, requireMember, getUserId } from './authz.js';
-import { applyResidueToLargestCreditor, computeSettlement } from './settlement.js';
+import { computeSettlement } from './settlement.js';
 import { authComponent } from './betterAuth/auth.js';
 import { v } from 'convex/values';
 import type { Id } from './_generated/dataModel.js';
@@ -71,7 +71,7 @@ export const insertRoom = mutation({
 		if (total > 100_000_000) {
 			throw new Error('Bill total exceeds ₱1,000,000 limit');
 		}
-		if (args.ownContributionCentavos < 0 || args.ownContributionCentavos > total) {
+		if (args.ownContributionCentavos < 0 || args.ownContributionCentavos > 100_000_000) {
 			throw new Error('Invalid contribution amount');
 		}
 		const now = Date.now();
@@ -244,17 +244,11 @@ export const setContribution = mutation({
 		if (total === 0) {
 			throw new Error('Cannot contribute to a room with no bill total');
 		}
-		if (amountCentavos < 0 || amountCentavos > total) {
-			throw new Error('Contribution must be between 0 and the bill total');
+		if (amountCentavos < 0) {
+			throw new Error('Contribution cannot be negative');
 		}
-		const otherTotal = (
-			await ctx.db
-				.query('contributions')
-				.withIndex('roomId', (q) => q.eq('roomId', roomId))
-				.collect()
-		).reduce((sum, c) => (c.userId !== userId ? sum + c.amountCentavos : sum), 0);
-		if (amountCentavos > total - otherTotal) {
-			throw new Error('Contribution would exceed remaining bill total');
+		if (amountCentavos > 100_000_000) {
+			throw new Error('Amount exceeds maximum of ₱1,000,000');
 		}
 		const existing = await ctx.db
 			.query('contributions')
@@ -300,11 +294,11 @@ export const finalizeSettlement = mutation({
 		}
 
 		const totalContributed = contributions.reduce((sum, c) => sum + c.amountCentavos, 0);
-		if (totalContributed !== totalCost) {
-			throw new Error('Total contributions must equal the bill total');
+		if (totalContributed < totalCost) {
+			throw new Error('Total contributions must cover the bill total');
 		}
 
-		const { transactions, residueCentavos } = computeSettlement(
+		const { transactions, change } = computeSettlement(
 			{
 				items: items.map((i) => ({
 					_id: i._id,
@@ -320,10 +314,8 @@ export const finalizeSettlement = mutation({
 			},
 			'strict'
 		);
-		const adjustedTransactions = applyResidueToLargestCreditor(transactions, residueCentavos);
-
 		const now = Date.now();
-		for (const t of adjustedTransactions) {
+		for (const t of transactions) {
 			await ctx.db.insert('settlementPayments', {
 				roomId,
 				payerUserId: t.payerUserId,
@@ -335,9 +327,13 @@ export const finalizeSettlement = mutation({
 			});
 		}
 
-		await ctx.db.patch(roomId, { status: 'settling', lastActivity: now });
+		if (transactions.length === 0) {
+			await ctx.db.patch(roomId, { status: 'settled', lastActivity: now });
+		} else {
+			await ctx.db.patch(roomId, { status: 'settling', lastActivity: now });
+		}
 
-		return { transactions: adjustedTransactions, residueCentavos };
+		return { transactions, change };
 	})
 });
 
