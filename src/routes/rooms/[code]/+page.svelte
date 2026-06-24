@@ -177,6 +177,12 @@
 				</div>
 				{#if isCreator && editable}
 					<div class="text-right">
+						<a
+							href="/rooms/{data.code}/settings"
+							class="mb-2 inline-block rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+						>
+							Room Settings
+						</a>
 						<div class="flex items-center justify-end gap-2">
 							<div
 								class="relative inline-flex"
@@ -206,12 +212,6 @@
 						</div>
 					</div>
 				{/if}
-				<a
-					href="./settings"
-					class="inline-block rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-				>
-					Settings
-				</a>
 				{#if isCreator && state.room.status === 'settled'}
 					<div class="text-right">
 						<button
