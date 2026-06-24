@@ -34,9 +34,6 @@
 	const isCreator = $derived(
 		!!roomState.data && roomState.data.room.createdBy === currentUserId
 	);
-	const totalCentavos = $derived(
-		roomState.data?.items.reduce((sum, i) => sum + i.priceCentavos * i.qty, 0) ?? 0
-	);
 	const editable = $derived(roomState.data?.room.status === 'collecting');
 	const paymentProgress = $derived(
 		roomState.data
@@ -203,16 +200,15 @@
 				profiles={state.profiles}
 				currentUserId={currentUserId}
 				isCreator={isCreator}
-				totalCentavos={totalCentavos}
 				onSetRole={handleSetRole}
 				onSetContribution={handleSetContribution}
 			/>
 		</section>
 
-		{#if preview.data && state.room.status === 'collecting'}
+		{#if preview.data}
 			<SettlementPreview
 				transactions={preview.data.transactions}
-				residueCentavos={preview.data.residueCentavos}
+				change={preview.data.change}
 				unclaimedItems={preview.data.unclaimedItems}
 				fundingGap={preview.data.fundingGap}
 				profiles={state.profiles}

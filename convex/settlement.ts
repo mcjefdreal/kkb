@@ -36,7 +36,6 @@ export interface SettlementChange {
 export interface SettlementResult {
 	transactions: SettlementTransaction[];
 	change: SettlementChange[];
-	residueCentavos: number;
 	unclaimedItems: SettlementItem[];
 	fundingGap: number;
 }
@@ -129,7 +128,6 @@ export function computeSettlement(
 		if (creditor.amount === 0) j++;
 	}
 
-	const residueCentavos = creditors.reduce((sum, c) => sum + c.amount, 0);
 	const change: SettlementChange[] = creditors
 		.filter((c) => c.amount > 0)
 		.map((c) => ({ userId: c.userId, amountCentavos: c.amount }));
@@ -137,7 +135,6 @@ export function computeSettlement(
 	return {
 		transactions,
 		change,
-		residueCentavos,
 		unclaimedItems,
 		fundingGap
 	};

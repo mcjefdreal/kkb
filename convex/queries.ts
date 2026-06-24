@@ -89,7 +89,6 @@ export const previewSettlement = query({
 		return {
 			transactions: result.transactions,
 			change: result.change,
-			residueCentavos: result.residueCentavos,
 			unclaimedItems: result.unclaimedItems,
 			fundingGap: result.fundingGap
 		};
