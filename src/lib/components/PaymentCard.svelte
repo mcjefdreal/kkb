@@ -6,7 +6,7 @@
 
 	interface Props {
 		payment: SettlementPayment;
-		profiles: Record<string, Pick<Profile, 'displayName' | 'gcashNumber' | 'mayaNumber'>>;
+		profiles: Record<string, Pick<Profile, 'displayName'>>;
 		currentUserId: string;
 		onMarkPaid: (method: 'cash' | 'gcash' | 'maya') => void;
 		onUnmark: () => void;
@@ -18,8 +18,6 @@
 	const isPayer = payment.payerUserId === currentUserId;
 	const isPayee = payment.payeeUserId === currentUserId;
 	const payee = profiles[payment.payeeUserId];
-	const hasGcash = !!payee?.gcashNumber;
-	const hasMaya = !!payee?.mayaNumber;
 </script>
 
 <div class="rounded-lg border border-slate-200 p-4">
@@ -53,26 +51,19 @@
 					>
 						Cash
 					</button>
-					{#if hasGcash}
-						<button
-							onclick={() => onMarkPaid('gcash')}
-							class="rounded bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100"
-						>
-							GCash
-						</button>
-					{/if}
-					{#if hasMaya}
-						<button
-							onclick={() => onMarkPaid('maya')}
-							class="rounded bg-purple-50 px-2 py-1 text-xs text-purple-700 hover:bg-purple-100"
-						>
-							Maya
-						</button>
-					{/if}
+					<button
+						onclick={() => onMarkPaid('gcash')}
+						class="rounded bg-blue-50 px-2 py-1 text-xs text-blue-700 hover:bg-blue-100"
+					>
+						GCash
+					</button>
+					<button
+						onclick={() => onMarkPaid('maya')}
+						class="rounded bg-purple-50 px-2 py-1 text-xs text-purple-700 hover:bg-purple-100"
+					>
+						Maya
+					</button>
 				</div>
-				{#if !hasGcash && !hasMaya}
-					<p class="mt-1 text-xs text-amber-600">Payee has no e-wallet configured.</p>
-				{/if}
 			{:else if payment.status === 'pending_confirmation'}
 				<div class="mt-2 flex items-center justify-end gap-2">
 					<HelpButton

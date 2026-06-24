@@ -7,7 +7,7 @@
 	interface Props {
 		members: RoomMember[];
 		contributions: Contribution[];
-		profiles: Record<string, Pick<Profile, 'displayName' | 'gcashNumber' | 'mayaNumber'>>;
+		profiles: Record<string, Pick<Profile, 'displayName'>>;
 		currentUserId: string;
 		isCreator: boolean;
 		onSetRole: (targetUserId: string, role: 'member' | 'contributor') => void;
