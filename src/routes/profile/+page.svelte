@@ -9,11 +9,15 @@
 	const update = useMutation(api.profiles.updateProfile);
 
 	let displayName = $state('');
+	let gcashNumber = $state('');
+	let mayaNumber = $state('');
 	let saving = $state(false);
 
 	$effect(() => {
 		if (profile.data) {
 			displayName = profile.data.displayName ?? '';
+			gcashNumber = profile.data.gcashNumber ?? '';
+			mayaNumber = profile.data.mayaNumber ?? '';
 		}
 	});
 
@@ -21,7 +25,11 @@
 		e.preventDefault();
 		saving = true;
 		try {
-			await update({ displayName });
+			await update({
+				displayName,
+				gcashNumber: gcashNumber || undefined,
+				mayaNumber: mayaNumber || undefined
+			});
 			toasts.add('Profile saved', 'success');
 		} catch (err) {
 			toasts.add(friendlyError(err, 'Save failed'), 'error');
@@ -43,6 +51,22 @@
 				id="displayName"
 				bind:value={displayName}
 				required
+				class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+			/>
+		</div>
+		<div>
+			<label class="block text-sm font-medium" for="gcash">GCash number</label>
+			<input
+				id="gcash"
+				bind:value={gcashNumber}
+				class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+			/>
+		</div>
+		<div>
+			<label class="block text-sm font-medium" for="maya">Maya number</label>
+			<input
+				id="maya"
+				bind:value={mayaNumber}
 				class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
 			/>
 		</div>
