@@ -158,12 +158,7 @@
 		<div class="space-y-6">
 			<div class="flex items-start justify-between">
 				<div>
-					<a
-						href="/dashboard"
-						class="mb-1 text-sm text-slate-500 hover:text-slate-700"
-					>
-						← Back
-					</a>
+					<a href="/dashboard" class="mb-1 text-sm text-slate-500 hover:text-slate-700"> ← Back </a>
 					<h1 class="text-2xl font-bold">{state.room.name}</h1>
 					<p class="font-mono text-sm text-slate-500">Code: {data.code}</p>
 					<p class="flex items-center gap-1 text-xs uppercase text-slate-400">
@@ -187,37 +182,37 @@
 						>
 							Room Settings
 						</a>
-					</div>
-				{/if}
-				{#if isCreator && editable}
-					<div class="text-right">
-						<div class="flex items-center justify-end gap-2">
-							<div
-								class="relative inline-flex"
-								onmouseenter={() => (hovering = true)}
-								onmouseleave={() => (hovering = false)}
-							>
-								<button
-									onclick={handleFinalize}
-									disabled={!lockReady}
-									class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-slate-900"
-								>
-									Lock & settle
-								</button>
-								{#if hovering && !lockReady && lockTooltipText}
-									<span
-										role="tooltip"
-										class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 w-max max-w-xs -translate-x-1/2 rounded bg-slate-800 px-2 py-1 text-center text-xs text-white shadow-lg"
+						{#if editable}
+							<div class="text-right">
+								<div class="flex items-center justify-end gap-2">
+									<HelpButton
+										label="Help about locking the room"
+										text="Locks the room, computes who owes whom, and starts payments. You can only reopen while no payments are in progress."
+									/>
+									<div
+										class="relative inline-flex"
+										onmouseenter={() => (hovering = true)}
+										onmouseleave={() => (hovering = false)}
 									>
-										{lockTooltipText}
-									</span>
-								{/if}
+										<button
+											onclick={handleFinalize}
+											disabled={!lockReady}
+											class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-slate-900"
+										>
+											Lock & settle
+										</button>
+										{#if hovering && !lockReady && lockTooltipText}
+											<span
+												role="tooltip"
+												class="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1 w-max max-w-xs -translate-x-1/2 rounded bg-slate-800 px-2 py-1 text-center text-xs text-white shadow-lg"
+											>
+												{lockTooltipText}
+											</span>
+										{/if}
+									</div>
+								</div>
 							</div>
-							<HelpButton
-								label="Help about locking the room"
-								text="Locks the room, computes who owes whom, and starts payments. You can only reopen while no payments are in progress."
-							/>
-						</div>
+						{/if}
 					</div>
 				{/if}
 				{#if isCreator && state.room.status === 'settled'}
